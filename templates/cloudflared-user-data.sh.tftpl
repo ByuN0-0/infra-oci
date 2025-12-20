@@ -1,0 +1,15 @@
+#!/bin/bash
+set -euo pipefail
+
+hostnamectl set-hostname ${hostname}
+
+dnf install -y curl docker
+curl -L -o /tmp/cloudflared.rpm https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-arm64.rpm
+dnf install -y /tmp/cloudflared.rpm
+
+cloudflared service install ${cloudflare_tunnel_token}
+systemctl enable cloudflared
+systemctl start cloudflared
+
+systemctl enable docker
+systemctl start docker

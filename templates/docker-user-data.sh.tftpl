@@ -1,0 +1,8 @@
+#!/bin/bash
+set -euo pipefail
+
+hostnamectl set-hostname ${hostname}
+
+dnf install -y docker
+systemctl enable docker
+systemctl start docker
