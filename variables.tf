@@ -38,7 +38,7 @@ variable "ssh_authorized_keys" {
 variable "vcn_name" {
   type        = string
   description = "VCN display name."
-  default     = "vcn-main"
+  default     = "vcn-biyeon"
 }
 
 variable "vcn_cidr" {
