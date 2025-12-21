@@ -1,11 +1,3 @@
-provider "oci" {
-  tenancy_ocid = var.tenancy_ocid
-  user_ocid    = var.user_ocid
-  fingerprint  = var.fingerprint
-  private_key  = var.private_key
-  region       = var.region
-}
-
 data "oci_identity_availability_domains" "ads" {
   compartment_id = var.tenancy_ocid
 }
@@ -21,6 +13,9 @@ module "network" {
   vcn_cidr             = var.vcn_cidr
   public_subnet_cidr   = var.public_subnet_cidr
   private_subnet_cidr  = var.private_subnet_cidr
+  providers = {
+    oci = oci
+  }
 }
 
 module "minecraft" {
@@ -38,6 +33,9 @@ module "minecraft" {
   user_data           = templatefile("${path.module}/templates/docker-user-data.sh.tftpl", {
     hostname = "minecraft"
   })
+  providers = {
+    oci = oci
+  }
 }
 
 module "private_app" {
@@ -56,6 +54,9 @@ module "private_app" {
     cloudflare_tunnel_token = var.cloudflare_tunnel_token
     hostname                = "grafana"
   })
+  providers = {
+    oci = oci
+  }
 }
 
 module "object_storage" {
@@ -64,4 +65,7 @@ module "object_storage" {
   namespace         = var.ocir_namespace
   bucket_name       = var.object_storage_bucket_name
   access_type       = var.object_storage_access_type
+  providers = {
+    oci = oci
+  }
 }
