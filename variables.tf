@@ -98,7 +98,7 @@ variable "private_ocpus" {
 variable "private_memory_gbs" {
   type        = number
   description = "Memory (GB) for the private instance."
-  default     = 4
+  default     = 2
 }
 
 variable "cloudflare_tunnel_token" {
@@ -107,10 +107,9 @@ variable "cloudflare_tunnel_token" {
   sensitive   = true
 }
 
-variable "ocir_namespace" {
+variable "namespace" {
   type        = string
-  description = "OCIR namespace."
-  default     = "biyeon"
+  description = "Object Storage namespace."
 }
 
 variable "object_storage_bucket_name" {

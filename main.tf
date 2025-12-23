@@ -62,7 +62,7 @@ module "private_app" {
 module "object_storage" {
   source            = "./modules/storage"
   compartment_ocid  = var.compartment_ocid
-  namespace         = var.ocir_namespace
+  namespace         = var.namespace
   bucket_name       = var.object_storage_bucket_name
   access_type       = var.object_storage_access_type
   providers = {

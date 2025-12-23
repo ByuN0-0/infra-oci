@@ -33,9 +33,9 @@ output "private_instance_private_ip" {
   value       = module.private_app.private_ip
 }
 
-output "ocir_namespace" {
-  description = "OCIR namespace."
-  value       = var.ocir_namespace
+output "namespace" {
+  description = "Object Storage namespace."
+  value       = var.namespace
 }
 
 output "object_storage_bucket_name" {
