@@ -65,45 +65,45 @@ variable "availability_domain_index" {
   default     = 0
 }
 
-variable "minecraft_shape" {
+variable "mc_server_shape" {
   type        = string
-  description = "Shape for the Minecraft instance."
+  description = "Shape for the MC server instance."
   default     = "VM.Standard.A1.Flex"
 }
 
-variable "minecraft_ocpus" {
+variable "mc_server_ocpus" {
   type        = number
-  description = "OCPUs for the Minecraft instance."
+  description = "OCPUs for the MC server instance."
   default     = 1
 }
 
-variable "minecraft_memory_gbs" {
+variable "mc_server_memory_gbs" {
   type        = number
-  description = "Memory (GB) for the Minecraft instance."
+  description = "Memory (GB) for the MC server instance."
   default     = 10
 }
 
-variable "private_shape" {
+variable "monitor_shape" {
   type        = string
-  description = "Shape for the private instance."
+  description = "Shape for the monitor instance."
   default     = "VM.Standard.A1.Flex"
 }
 
-variable "private_ocpus" {
+variable "monitor_ocpus" {
   type        = number
-  description = "OCPUs for the private instance."
+  description = "OCPUs for the monitor instance."
   default     = 1
 }
 
-variable "private_memory_gbs" {
+variable "monitor_memory_gbs" {
   type        = number
-  description = "Memory (GB) for the private instance."
+  description = "Memory (GB) for the monitor instance."
   default     = 2
 }
 
 variable "cloudflare_tunnel_token" {
   type        = string
-  description = "Cloudflare Tunnel token for the private instance."
+  description = "Cloudflare Tunnel token for the monitor instance."
   sensitive   = true
 }
 

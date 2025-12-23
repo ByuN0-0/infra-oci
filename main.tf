@@ -18,36 +18,36 @@ module "network" {
   }
 }
 
-module "minecraft" {
+module "mc_server" {
   source              = "./modules/compute"
   compartment_ocid    = var.compartment_ocid
   availability_domain = local.availability_domain
   subnet_id           = module.network.public_subnet_id
-  display_name        = "minecraft"
-  hostname_label      = "minecraft"
-  shape               = var.minecraft_shape
-  ocpus               = var.minecraft_ocpus
-  memory_in_gbs       = var.minecraft_memory_gbs
+  display_name        = "mc_server"
+  hostname_label      = "mc-server"
+  shape               = var.mc_server_shape
+  ocpus               = var.mc_server_ocpus
+  memory_in_gbs       = var.mc_server_memory_gbs
   ssh_authorized_keys = var.ssh_authorized_keys
   assign_public_ip    = true
   user_data           = templatefile("${path.module}/templates/docker-user-data.sh.tftpl", {
-    hostname = "minecraft"
+    hostname = "mc-server"
   })
   providers = {
     oci = oci
   }
 }
 
-module "private_app" {
+module "monitor_app" {
   source              = "./modules/compute"
   compartment_ocid    = var.compartment_ocid
   availability_domain = local.availability_domain
   subnet_id           = module.network.private_subnet_id
   display_name        = "grafana-shared-storage"
   hostname_label      = "grafana"
-  shape               = var.private_shape
-  ocpus               = var.private_ocpus
-  memory_in_gbs       = var.private_memory_gbs
+  shape               = var.monitor_shape
+  ocpus               = var.monitor_ocpus
+  memory_in_gbs       = var.monitor_memory_gbs
   ssh_authorized_keys = var.ssh_authorized_keys
   assign_public_ip    = false
   user_data           = templatefile("${path.module}/templates/cloudflared-user-data.sh.tftpl", {

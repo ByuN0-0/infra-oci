@@ -13,24 +13,24 @@ output "private_subnet_id" {
   value       = module.network.private_subnet_id
 }
 
-output "minecraft_instance_id" {
-  description = "Minecraft instance OCID."
-  value       = module.minecraft.instance_id
+output "mc_server_instance_id" {
+  description = "MC server instance OCID."
+  value       = module.mc_server.instance_id
 }
 
-output "minecraft_public_ip" {
-  description = "Minecraft instance public IP."
-  value       = module.minecraft.public_ip
+output "mc_server_public_ip" {
+  description = "MC server instance public IP."
+  value       = module.mc_server.public_ip
 }
 
-output "private_instance_id" {
-  description = "Grafana/shared-storage instance OCID."
-  value       = module.private_app.instance_id
+output "monitor_instance_id" {
+  description = "Monitor instance OCID."
+  value       = module.monitor_app.instance_id
 }
 
-output "private_instance_private_ip" {
-  description = "Grafana/shared-storage private IP."
-  value       = module.private_app.private_ip
+output "monitor_instance_private_ip" {
+  description = "Monitor instance private IP."
+  value       = module.monitor_app.private_ip
 }
 
 output "namespace" {
