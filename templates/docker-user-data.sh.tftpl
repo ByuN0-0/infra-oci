@@ -9,6 +9,7 @@ dnf install -y dnf-utils
 dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
 dnf install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
 systemctl enable --now docker
+usermod -aG docker opc
 
 # 3. OS 방화벽 개방 (마크 포트 및 Exporter 포트)
 firewall-offline-cmd --add-port=25565/tcp
