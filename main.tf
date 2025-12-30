@@ -54,7 +54,7 @@ module "monitor_app" {
   compartment_ocid    = var.compartment_ocid
   availability_domain = local.availability_domain
   subnet_id           = module.network.private_subnet_id
-  display_name        = "grafana-shared-storage"
+  display_name        = "grafana"
   hostname_label      = "grafana"
   shape               = var.monitor_shape
   ocpus               = var.monitor_ocpus
