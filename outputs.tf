@@ -23,6 +23,16 @@ output "mc_server_public_ip" {
   value       = module.mc_server.public_ip
 }
 
+output "bastion_service_id" {
+  description = "OCI Bastion Service OCID."
+  value       = oci_bastion_bastion.this.id
+}
+
+output "bastion_service_name" {
+  description = "OCI Bastion Service name."
+  value       = oci_bastion_bastion.this.name
+}
+
 output "monitor_instance_id" {
   description = "Monitor instance OCID."
   value       = module.monitor_app.instance_id

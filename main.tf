@@ -39,6 +39,16 @@ module "mc_server" {
   }
 }
 
+# OCI Bastion Service (관리형 배스천)
+resource "oci_bastion_bastion" "this" {
+  bastion_type                 = "STANDARD"
+  compartment_id               = var.compartment_ocid
+  target_subnet_id             = module.network.private_subnet_id
+  client_cidr_block_allow_list = ["0.0.0.0/0"]
+  name                         = "bastion-service"
+  max_session_ttl_in_seconds   = 10800 # 3시간
+}
+
 module "monitor_app" {
   source              = "./modules/compute"
   compartment_ocid    = var.compartment_ocid
