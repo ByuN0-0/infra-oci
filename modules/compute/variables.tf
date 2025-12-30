@@ -53,3 +53,9 @@ variable "user_data" {
   description = "Cloud-init user data."
   default     = ""
 }
+
+variable "block_storage_size_in_gbs" {
+  type        = number
+  description = "Block storage size in GB. Set to 0 to disable."
+  default     = 0
+}

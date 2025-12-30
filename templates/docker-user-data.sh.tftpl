@@ -1,8 +1,38 @@
 #!/bin/bash
 set -euo pipefail
 
+# 1. Hostname 설정
 hostnamectl set-hostname ${hostname}
 
-dnf install -y docker
-systemctl enable docker
-systemctl start docker
+# 2. Docker 및 필요한 패키지 설치 (Oracle Linux 8 기준)
+dnf install -y dnf-utils
+dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+dnf install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+systemctl enable --now docker
+
+# 3. OS 방화벽 개방 (마크 포트 및 Exporter 포트)
+firewall-offline-cmd --add-port=25565/tcp
+firewall-offline-cmd --add-port=9150/tcp
+firewall-offline-cmd --add-port=9100/tcp
+systemctl restart firewalld
+
+# 4. 작업 디렉토리 생성
+mkdir -p /home/opc/mc-server/data
+
+# 5. 블록 볼륨 마운트 (추가 볼륨이 있을 경우)
+# Paravirtualized 모드에서 첫 번째 추가 볼륨은 보통 /dev/sdb 입니다.
+DEVICE="/dev/sdb"
+
+if [ -b "$DEVICE" ]; then
+    # 파일 시스템이 없으면 생성 (ext4)
+    if ! blkid "$DEVICE"; then
+        mkfs.ext4 "$DEVICE"
+    fi
+
+    # 마운트 및 부팅 시 자동 마운트 설정
+    mount "$DEVICE" /home/opc/mc-server/data
+    echo "$DEVICE /home/opc/mc-server/data ext4 defaults,noatime 0 2" >> /etc/fstab
+fi
+
+# 6. 권한 설정
+chown -R opc:opc /home/opc/mc-server

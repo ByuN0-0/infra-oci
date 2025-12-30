@@ -30,6 +30,7 @@ module "mc_server" {
   memory_in_gbs       = var.mc_server_memory_gbs
   ssh_authorized_keys = var.ssh_authorized_keys
   assign_public_ip    = true
+  block_storage_size_in_gbs = 50
   user_data           = templatefile("${path.module}/templates/docker-user-data.sh.tftpl", {
     hostname = "mc-server"
   })
