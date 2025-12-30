@@ -1,15 +1,35 @@
 #!/bin/bash
 set -euo pipefail
 
+# 1. Hostname 설정
 hostnamectl set-hostname ${hostname}
 
-dnf install -y curl docker
+# 2. Docker 설치 (Oracle Linux 8 기준)
+dnf install -y dnf-utils
+dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+dnf install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+systemctl enable --now docker
+usermod -aG docker opc
+
+# 3. Cloudflared 설치
 curl -L -o /tmp/cloudflared.rpm https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-arm64.rpm
 dnf install -y /tmp/cloudflared.rpm
-
 cloudflared service install ${cloudflare_tunnel_token}
-systemctl enable cloudflared
-systemctl start cloudflared
+systemctl enable --now cloudflared
 
-systemctl enable docker
-systemctl start docker
+# 4. 작업 디렉토리 생성
+mkdir -p /home/opc/monitor/data
+
+# 5. 블록 볼륨 마운트
+DEVICE="/dev/sdb"
+if [ -b "$DEVICE" ]; then
+    if ! blkid "$DEVICE"; then
+        mkfs.ext4 "$DEVICE"
+    fi
+    mount "$DEVICE" /home/opc/monitor/data
+    echo "$DEVICE /home/opc/monitor/data ext4 defaults,noatime 0 2" >> /etc/fstab
+fi
+
+# 6. 권한 설정
+chown -R opc:opc /home/opc/monitor
+chmod -R 775 /home/opc/monitor/data

@@ -51,6 +51,7 @@ module "monitor_app" {
   memory_in_gbs       = var.monitor_memory_gbs
   ssh_authorized_keys = var.ssh_authorized_keys
   assign_public_ip    = false
+  block_storage_size_in_gbs = 50
   user_data           = templatefile("${path.module}/templates/cloudflared-user-data.sh.tftpl", {
     cloudflare_tunnel_token = var.cloudflare_tunnel_token
     hostname                = "grafana"
