@@ -11,25 +11,21 @@ dnf install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
 systemctl enable --now docker
 usermod -aG docker opc
 
-# 3. Cloudflared 설치
-curl -L -o /tmp/cloudflared.rpm https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-arm64.rpm
-dnf install -y /tmp/cloudflared.rpm
-cloudflared service install ${cloudflare_tunnel_token}
-systemctl enable --now cloudflared
-
-# 4. 작업 디렉토리 생성
+# 3. 작업 디렉토리 생성
 mkdir -p /home/opc/monitor/data
 
-# 5. 블록 볼륨 마운트
+# 4. 블록 볼륨 마운트
 DEVICE="/dev/sdb"
 if [ -b "$DEVICE" ]; then
-    if ! blkid "$DEVICE"; then
+    if ! blkid "$DEVICE" > /dev/null; then
         mkfs.ext4 "$DEVICE"
     fi
     mount "$DEVICE" /home/opc/monitor/data
-    echo "$DEVICE /home/opc/monitor/data ext4 defaults,noatime 0 2" >> /etc/fstab
+    if ! grep -q "$DEVICE" /etc/fstab; then
+        echo "$DEVICE /home/opc/monitor/data ext4 defaults,noatime 0 2" >> /etc/fstab
+    fi
 fi
 
-# 6. 권한 설정
+# 5. 권한 설정
 chown -R opc:opc /home/opc/monitor
 chmod -R 775 /home/opc/monitor/data
