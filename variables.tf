@@ -98,7 +98,7 @@ variable "monitor_ocpus" {
 variable "monitor_memory_gbs" {
   type        = number
   description = "Memory (GB) for the monitor instance."
-  default     = 2
+  default     = 4
 }
 
 variable "cloudflare_tunnel_token" {
