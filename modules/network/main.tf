@@ -100,6 +100,26 @@ resource "oci_core_security_list" "public" {
     }
   }
 
+  ingress_security_rules {
+    protocol    = "6"
+    source      = var.vcn_cidr
+    source_type = "CIDR_BLOCK"
+    tcp_options {
+      min = 9100
+      max = 9100
+    }
+  }
+
+  ingress_security_rules {
+    protocol    = "6"
+    source      = var.vcn_cidr
+    source_type = "CIDR_BLOCK"
+    tcp_options {
+      min = 9225
+      max = 9225
+    }
+  }
+
   egress_security_rules {
     protocol         = "all"
     destination      = "0.0.0.0/0"
