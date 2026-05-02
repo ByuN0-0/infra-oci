@@ -117,8 +117,8 @@ resource "oci_core_security_list" "private" {
     source      = var.public_subnet_cidr
     source_type = "CIDR_BLOCK"
     tcp_options {
-      min = var.blog_api_port
-      max = var.blog_api_port
+      min = var.my_hub_api_port
+      max = var.my_hub_api_port
     }
   }
 

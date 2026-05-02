@@ -33,7 +33,7 @@ variable "compartment_ocid" {
 variable "vcn_name" {
   type        = string
   description = "VCN display name."
-  default     = "vcn-biyeon"
+  default     = "my-hub-vcn"
 }
 
 variable "vcn_cidr" {
@@ -60,67 +60,79 @@ variable "availability_domain_index" {
   default     = 0
 }
 
-variable "blog_api_hostname" {
+variable "my_hub_api_hostname" {
   type        = string
-  description = "Public hostname to point manually at the OCI load balancer."
-  default     = "api.blog.biyeon.net"
+  description = "Public hostname to point manually at the my-hub API load balancer."
+  default     = "api.my-hub.biyeon.net"
 }
 
-variable "blog_api_container_shape" {
+variable "my_hub_api_compute_shape" {
   type        = string
-  description = "Shape for the blog API container instance."
-  default     = "CI.Standard.A1.Flex"
+  description = "Shape for the my-hub API compute instance."
+  default     = "VM.Standard.A1.Flex"
 }
 
-variable "blog_api_ocpus" {
+variable "my_hub_api_ocpus" {
   type        = number
-  description = "OCPUs for the blog API container instance."
-  default     = 1
-}
-
-variable "blog_api_memory_gbs" {
-  type        = number
-  description = "Memory (GB) for the blog API container instance."
+  description = "OCPUs for the my-hub API compute instance."
   default     = 4
 }
 
-variable "blog_api_repository_name" {
-  type        = string
-  description = "OCIR repository name for the blog REST API image."
-  default     = "blog-rest-api"
+variable "my_hub_api_memory_gbs" {
+  type        = number
+  description = "Memory (GB) for the my-hub API compute instance."
+  default     = 24
 }
 
-variable "blog_api_image_tag" {
+variable "my_hub_api_boot_volume_size_gbs" {
+  type        = number
+  description = "Boot volume size in GBs for the my-hub API compute instance."
+  default     = 200
+}
+
+variable "ssh_authorized_keys" {
   type        = string
-  description = "OCIR image tag for the blog REST API image."
+  description = "SSH public key for instance access."
+  sensitive   = true
+}
+
+variable "my_hub_api_repository_name" {
+  type        = string
+  description = "OCIR repository name for the my-hub API image."
+  default     = "my-hub-api"
+}
+
+variable "my_hub_api_image_tag" {
+  type        = string
+  description = "OCIR image tag for the my-hub API image."
   default     = "latest"
 }
 
-variable "blog_api_port" {
+variable "my_hub_api_port" {
   type        = number
-  description = "Container port exposed by the blog REST API."
+  description = "Port exposed by the my-hub API."
   default     = 8080
 }
 
-variable "blog_api_health_path" {
+variable "my_hub_api_health_path" {
   type        = string
-  description = "HTTP health check path exposed by the blog REST API."
+  description = "HTTP health check path exposed by the my-hub API."
   default     = "/health"
 }
 
-variable "blog_api_environment_variables" {
+variable "my_hub_api_environment_variables" {
   type        = map(string)
-  description = "Additional non-secret environment variables for the blog API container."
+  description = "Additional non-secret environment variables for the my-hub API."
   default     = {}
 }
 
-variable "blog_api_lb_min_bandwidth_mbps" {
+variable "my_hub_api_lb_min_bandwidth_mbps" {
   type        = number
   description = "Minimum bandwidth for the flexible public load balancer."
   default     = 10
 }
 
-variable "blog_api_lb_max_bandwidth_mbps" {
+variable "my_hub_api_lb_max_bandwidth_mbps" {
   type        = number
   description = "Maximum bandwidth for the flexible public load balancer."
   default     = 10
@@ -191,7 +203,7 @@ variable "enable_nosql_table" {
 variable "nosql_table_name" {
   type        = string
   description = "Name for the Oracle NoSQL experiment table."
-  default     = "blog_experiment"
+  default     = "my_hub_experiment"
 }
 
 variable "namespace" {

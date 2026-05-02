@@ -13,34 +13,34 @@ output "private_subnet_id" {
   value       = module.network.private_subnet_id
 }
 
-output "blog_api_container_instance_id" {
-  description = "Blog API container instance OCID."
-  value       = oci_container_instances_container_instance.blog_api.id
+output "my_hub_api_compute_instance_id" {
+  description = "my-hub API compute instance OCID."
+  value       = oci_core_instance.my_hub_api.id
 }
 
-output "blog_api_image_url" {
-  description = "OCIR image URL used by the blog API container."
-  value       = local.blog_api_image_url
+output "my_hub_api_image_url" {
+  description = "OCIR image URL used by the my-hub API."
+  value       = local.my_hub_api_image_url
 }
 
-output "blog_api_repository_id" {
-  description = "OCIR repository OCID for the blog API image."
-  value       = oci_artifacts_container_repository.blog_api.id
+output "my_hub_api_repository_id" {
+  description = "OCIR repository OCID for the my-hub API image."
+  value       = oci_artifacts_container_repository.my_hub_api.id
 }
 
-output "blog_api_private_ip" {
-  description = "Blog API container private IP."
-  value       = data.oci_core_vnic.blog_api.private_ip_address
+output "my_hub_api_private_ip" {
+  description = "my-hub API compute instance private IP."
+  value       = oci_core_instance.my_hub_api.private_ip
 }
 
-output "blog_api_lb_ip" {
-  description = "Blog API public load balancer IP."
-  value       = oci_load_balancer_load_balancer.blog_api.ip_address_details[0].ip_address
+output "my_hub_api_lb_ip" {
+  description = "my-hub API public load balancer IP."
+  value       = oci_load_balancer_load_balancer.my_hub_api.ip_address_details[0].ip_address
 }
 
-output "blog_api_hostname" {
-  description = "Blog API public hostname."
-  value       = var.blog_api_hostname
+output "my_hub_api_hostname" {
+  description = "my-hub API public hostname."
+  value       = var.my_hub_api_hostname
 }
 
 output "bastion_service_id" {
@@ -55,12 +55,12 @@ output "bastion_service_name" {
 
 output "mysql_heatwave_db_system_id" {
   description = "MySQL HeatWave DB system OCID."
-  value       = var.enable_mysql_heatwave ? oci_mysql_mysql_db_system.blog_api[0].id : null
+  value       = var.enable_mysql_heatwave ? oci_mysql_mysql_db_system.my_hub[0].id : null
 }
 
 output "mysql_heatwave_endpoint" {
   description = "MySQL HeatWave private endpoint hostname."
-  value       = var.enable_mysql_heatwave ? oci_mysql_mysql_db_system.blog_api[0].endpoints[0].hostname : null
+  value       = var.enable_mysql_heatwave ? oci_mysql_mysql_db_system.my_hub[0].endpoints[0].hostname : null
 }
 
 output "autonomous_json_database_id" {
@@ -75,7 +75,7 @@ output "autonomous_data_warehouse_id" {
 
 output "nosql_table_id" {
   description = "Oracle NoSQL experiment table OCID."
-  value       = var.enable_nosql_table ? oci_nosql_table.blog_experiment[0].id : null
+  value       = var.enable_nosql_table ? oci_nosql_table.my_hub_experiment[0].id : null
 }
 
 output "namespace" {

@@ -13,7 +13,7 @@ module "network" {
   vcn_cidr             = var.vcn_cidr
   public_subnet_cidr   = var.public_subnet_cidr
   private_subnet_cidr  = var.private_subnet_cidr
-  blog_api_port        = var.blog_api_port
+  my_hub_api_port    = var.my_hub_api_port
   providers = {
     oci = oci
   }

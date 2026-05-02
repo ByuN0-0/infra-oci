@@ -23,7 +23,7 @@ variable "private_subnet_cidr" {
   description = "Private subnet CIDR."
 }
 
-variable "blog_api_port" {
+variable "my_hub_api_port" {
   type        = number
-  description = "Port exposed by the blog REST API container."
+  description = "Port exposed by the my-hub API."
 }

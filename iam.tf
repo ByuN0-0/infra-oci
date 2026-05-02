@@ -1,7 +1,7 @@
 resource "oci_identity_policy" "mysql_heatwave_management" {
   count          = var.enable_mysql_heatwave && var.mysql_iam_policy_group_name != null ? 1 : 0
   compartment_id = var.tenancy_ocid
-  name           = "blog-mysql-heatwave-management"
+  name           = "my-hub-mysql-heatwave-management"
   description    = "Allow Terraform operators to create and attach MySQL HeatWave DB systems."
 
   statements = [
