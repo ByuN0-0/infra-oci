@@ -30,11 +30,6 @@ variable "compartment_ocid" {
   description = "Compartment OCID to deploy into."
 }
 
-variable "ssh_authorized_keys" {
-  type        = string
-  description = "SSH public key for instance access."
-}
-
 variable "vcn_name" {
   type        = string
   description = "VCN display name."
@@ -65,46 +60,132 @@ variable "availability_domain_index" {
   default     = 0
 }
 
-variable "mc_server_shape" {
+variable "blog_api_hostname" {
   type        = string
-  description = "Shape for the MC server instance."
-  default     = "VM.Standard.A1.Flex"
+  description = "Public hostname to point manually at the OCI load balancer."
+  default     = "api.blog.biyeon.net"
 }
 
-variable "mc_server_ocpus" {
+variable "blog_api_container_shape" {
+  type        = string
+  description = "Shape for the blog API container instance."
+  default     = "CI.Standard.A1.Flex"
+}
+
+variable "blog_api_ocpus" {
   type        = number
-  description = "OCPUs for the MC server instance."
+  description = "OCPUs for the blog API container instance."
   default     = 1
 }
 
-variable "mc_server_memory_gbs" {
+variable "blog_api_memory_gbs" {
   type        = number
-  description = "Memory (GB) for the MC server instance."
-  default     = 10
-}
-
-variable "monitor_shape" {
-  type        = string
-  description = "Shape for the monitor instance."
-  default     = "VM.Standard.A1.Flex"
-}
-
-variable "monitor_ocpus" {
-  type        = number
-  description = "OCPUs for the monitor instance."
-  default     = 1
-}
-
-variable "monitor_memory_gbs" {
-  type        = number
-  description = "Memory (GB) for the monitor instance."
+  description = "Memory (GB) for the blog API container instance."
   default     = 4
 }
 
-variable "cloudflare_tunnel_token" {
+variable "blog_api_repository_name" {
   type        = string
-  description = "Cloudflare Tunnel token for the monitor instance."
+  description = "OCIR repository name for the blog REST API image."
+  default     = "blog-rest-api"
+}
+
+variable "blog_api_image_tag" {
+  type        = string
+  description = "OCIR image tag for the blog REST API image."
+  default     = "latest"
+}
+
+variable "blog_api_port" {
+  type        = number
+  description = "Container port exposed by the blog REST API."
+  default     = 8080
+}
+
+variable "blog_api_health_path" {
+  type        = string
+  description = "HTTP health check path exposed by the blog REST API."
+  default     = "/health"
+}
+
+variable "blog_api_environment_variables" {
+  type        = map(string)
+  description = "Additional non-secret environment variables for the blog API container."
+  default     = {}
+}
+
+variable "blog_api_lb_min_bandwidth_mbps" {
+  type        = number
+  description = "Minimum bandwidth for the flexible public load balancer."
+  default     = 10
+}
+
+variable "blog_api_lb_max_bandwidth_mbps" {
+  type        = number
+  description = "Maximum bandwidth for the flexible public load balancer."
+  default     = 10
+}
+
+variable "mysql_admin_username" {
+  type        = string
+  description = "Admin username for MySQL HeatWave."
+  default     = "admin"
+}
+
+variable "mysql_admin_password" {
+  type        = string
+  description = "Admin password for MySQL HeatWave."
   sensitive   = true
+  default     = null
+}
+
+variable "enable_mysql_heatwave" {
+  type        = bool
+  description = "Whether to create the MySQL HeatWave Always Free DB system."
+  default     = true
+}
+
+variable "mysql_shape_name" {
+  type        = string
+  description = "MySQL HeatWave DB system shape."
+  default     = "MySQL.Free"
+}
+
+variable "mysql_data_storage_size_in_gb" {
+  type        = number
+  description = "MySQL HeatWave data storage size in GB."
+  default     = 50
+}
+
+variable "autonomous_admin_password" {
+  type        = string
+  description = "Admin password for Autonomous Database resources."
+  sensitive   = true
+  default     = null
+}
+
+variable "enable_autonomous_json_database" {
+  type        = bool
+  description = "Whether to create Autonomous JSON Database. OCI Terraform currently does not allow AJD with is_free_tier=true, so this defaults to false to avoid accidental paid resources."
+  default     = false
+}
+
+variable "enable_autonomous_data_warehouse" {
+  type        = bool
+  description = "Whether to create the Always Free Autonomous Data Warehouse."
+  default     = true
+}
+
+variable "enable_nosql_table" {
+  type        = bool
+  description = "Whether to create the Always Free Oracle NoSQL table."
+  default     = true
+}
+
+variable "nosql_table_name" {
+  type        = string
+  description = "Name for the Oracle NoSQL experiment table."
+  default     = "blog_experiment"
 }
 
 variable "namespace" {

@@ -85,8 +85,8 @@ resource "oci_core_security_list" "public" {
     source      = "0.0.0.0/0"
     source_type = "CIDR_BLOCK"
     tcp_options {
-      min = 22
-      max = 22
+      min = 80
+      max = 80
     }
   }
 
@@ -95,28 +95,8 @@ resource "oci_core_security_list" "public" {
     source      = "0.0.0.0/0"
     source_type = "CIDR_BLOCK"
     tcp_options {
-      min = 25565
-      max = 25565
-    }
-  }
-
-  ingress_security_rules {
-    protocol    = "6"
-    source      = var.vcn_cidr
-    source_type = "CIDR_BLOCK"
-    tcp_options {
-      min = 9100
-      max = 9100
-    }
-  }
-
-  ingress_security_rules {
-    protocol    = "6"
-    source      = var.vcn_cidr
-    source_type = "CIDR_BLOCK"
-    tcp_options {
-      min = 9225
-      max = 9225
+      min = 443
+      max = 443
     }
   }
 
@@ -133,9 +113,23 @@ resource "oci_core_security_list" "private" {
   display_name   = "${var.vcn_name}-private-sl"
 
   ingress_security_rules {
-    protocol    = "all"
-    source      = var.vcn_cidr
+    protocol    = "6"
+    source      = var.public_subnet_cidr
     source_type = "CIDR_BLOCK"
+    tcp_options {
+      min = var.blog_api_port
+      max = var.blog_api_port
+    }
+  }
+
+  ingress_security_rules {
+    protocol    = "6"
+    source      = var.private_subnet_cidr
+    source_type = "CIDR_BLOCK"
+    tcp_options {
+      min = 3306
+      max = 3306
+    }
   }
 
   egress_security_rules {

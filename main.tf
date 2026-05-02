@@ -13,27 +13,7 @@ module "network" {
   vcn_cidr             = var.vcn_cidr
   public_subnet_cidr   = var.public_subnet_cidr
   private_subnet_cidr  = var.private_subnet_cidr
-  providers = {
-    oci = oci
-  }
-}
-
-module "mc_server" {
-  source              = "./modules/compute"
-  compartment_ocid    = var.compartment_ocid
-  availability_domain = local.availability_domain
-  subnet_id           = module.network.public_subnet_id
-  display_name        = "mc_server"
-  hostname_label      = "mc-server"
-  shape               = var.mc_server_shape
-  ocpus               = var.mc_server_ocpus
-  memory_in_gbs       = var.mc_server_memory_gbs
-  ssh_authorized_keys = var.ssh_authorized_keys
-  assign_public_ip    = true
-  block_storage_size_in_gbs = 50
-  user_data           = templatefile("${path.module}/templates/docker-user-data.sh.tftpl", {
-    hostname = "mc-server"
-  })
+  blog_api_port        = var.blog_api_port
   providers = {
     oci = oci
   }
@@ -47,28 +27,6 @@ resource "oci_bastion_bastion" "this" {
   client_cidr_block_allow_list = ["0.0.0.0/0"]
   name                         = "bastion-service"
   max_session_ttl_in_seconds   = 10800 # 3시간
-}
-
-module "monitor_app" {
-  source              = "./modules/compute"
-  compartment_ocid    = var.compartment_ocid
-  availability_domain = local.availability_domain
-  subnet_id           = module.network.private_subnet_id
-  display_name        = "grafana"
-  hostname_label      = "grafana"
-  shape               = var.monitor_shape
-  ocpus               = var.monitor_ocpus
-  memory_in_gbs       = var.monitor_memory_gbs
-  ssh_authorized_keys = var.ssh_authorized_keys
-  assign_public_ip    = false
-  block_storage_size_in_gbs = 50
-  user_data           = templatefile("${path.module}/templates/cloudflared-user-data.sh.tftpl", {
-    cloudflare_tunnel_token = var.cloudflare_tunnel_token
-    hostname                = "grafana"
-  })
-  providers = {
-    oci = oci
-  }
 }
 
 module "object_storage" {

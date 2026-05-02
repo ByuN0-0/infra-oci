@@ -22,3 +22,8 @@ variable "private_subnet_cidr" {
   type        = string
   description = "Private subnet CIDR."
 }
+
+variable "blog_api_port" {
+  type        = number
+  description = "Port exposed by the blog REST API container."
+}

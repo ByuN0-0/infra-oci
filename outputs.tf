@@ -13,14 +13,34 @@ output "private_subnet_id" {
   value       = module.network.private_subnet_id
 }
 
-output "mc_server_instance_id" {
-  description = "MC server instance OCID."
-  value       = module.mc_server.instance_id
+output "blog_api_container_instance_id" {
+  description = "Blog API container instance OCID."
+  value       = oci_container_instances_container_instance.blog_api.id
 }
 
-output "mc_server_public_ip" {
-  description = "MC server instance public IP."
-  value       = module.mc_server.public_ip
+output "blog_api_image_url" {
+  description = "OCIR image URL used by the blog API container."
+  value       = local.blog_api_image_url
+}
+
+output "blog_api_repository_id" {
+  description = "OCIR repository OCID for the blog API image."
+  value       = oci_artifacts_container_repository.blog_api.id
+}
+
+output "blog_api_private_ip" {
+  description = "Blog API container private IP."
+  value       = data.oci_core_vnic.blog_api.private_ip_address
+}
+
+output "blog_api_lb_ip" {
+  description = "Blog API public load balancer IP."
+  value       = oci_load_balancer_load_balancer.blog_api.ip_address_details[0].ip_address
+}
+
+output "blog_api_hostname" {
+  description = "Blog API public hostname."
+  value       = var.blog_api_hostname
 }
 
 output "bastion_service_id" {
@@ -33,14 +53,29 @@ output "bastion_service_name" {
   value       = oci_bastion_bastion.this.name
 }
 
-output "monitor_instance_id" {
-  description = "Monitor instance OCID."
-  value       = module.monitor_app.instance_id
+output "mysql_heatwave_db_system_id" {
+  description = "MySQL HeatWave DB system OCID."
+  value       = var.enable_mysql_heatwave ? oci_mysql_mysql_db_system.blog_api[0].id : null
 }
 
-output "monitor_instance_private_ip" {
-  description = "Monitor instance private IP."
-  value       = module.monitor_app.private_ip
+output "mysql_heatwave_endpoint" {
+  description = "MySQL HeatWave private endpoint hostname."
+  value       = var.enable_mysql_heatwave ? oci_mysql_mysql_db_system.blog_api[0].endpoints[0].hostname : null
+}
+
+output "autonomous_json_database_id" {
+  description = "Autonomous JSON Database OCID."
+  value       = var.enable_autonomous_json_database ? oci_database_autonomous_database.json[0].id : null
+}
+
+output "autonomous_data_warehouse_id" {
+  description = "Autonomous Data Warehouse OCID."
+  value       = var.enable_autonomous_data_warehouse ? oci_database_autonomous_database.warehouse[0].id : null
+}
+
+output "nosql_table_id" {
+  description = "Oracle NoSQL experiment table OCID."
+  value       = var.enable_nosql_table ? oci_nosql_table.blog_experiment[0].id : null
 }
 
 output "namespace" {
