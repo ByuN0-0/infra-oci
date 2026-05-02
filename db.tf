@@ -1,26 +1,3 @@
-resource "oci_core_network_security_group" "mysql" {
-  count          = var.enable_mysql_heatwave ? 1 : 0
-  compartment_id = var.compartment_ocid
-  vcn_id         = module.network.vcn_id
-  display_name   = "blog-mysql-nsg"
-}
-
-resource "oci_core_network_security_group_security_rule" "mysql_ingress_api" {
-  count                     = var.enable_mysql_heatwave ? 1 : 0
-  network_security_group_id = oci_core_network_security_group.mysql[0].id
-  direction                 = "INGRESS"
-  protocol                  = "6"
-  source                    = oci_core_network_security_group.blog_api_container.id
-  source_type               = "NETWORK_SECURITY_GROUP"
-
-  tcp_options {
-    destination_port_range {
-      min = 3306
-      max = 3306
-    }
-  }
-}
-
 resource "oci_mysql_mysql_db_system" "blog_api" {
   depends_on = [oci_identity_policy.mysql_heatwave_management]
 
@@ -35,7 +12,6 @@ resource "oci_mysql_mysql_db_system" "blog_api" {
   display_name           = "blog-api-mysql"
   hostname_label         = "blog-mysql"
   is_highly_available    = false
-  nsg_ids                = [oci_core_network_security_group.mysql[0].id]
   port                   = 3306
   port_x                 = 33060
 }
