@@ -164,8 +164,10 @@ resource "oci_core_instance" "my_hub_api" {
 
   metadata = {
     user_data = base64encode(templatefile("${path.module}/cloud-init-my-hub-api.yaml.tftpl", {
+      ocir_endpoint                    = local.ocir_endpoint
       my_hub_api_image_url             = local.my_hub_api_image_url
       my_hub_api_environment_variables = local.my_hub_api_environment_variables
+      my_hub_api_port                  = var.my_hub_api_port
     }))
     ssh_authorized_keys = var.ssh_authorized_keys
   }

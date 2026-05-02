@@ -14,6 +14,26 @@ write_files:
     permissions: "0644"
     content: |
       ${my_hub_api_image_url}
+  - path: /etc/containers/systemd/my-hub-api.container
+    owner: root:root
+    permissions: "0644"
+    content: |
+      [Unit]
+      Description=my-hub API
+      After=network-online.target
+      Wants=network-online.target
+
+      [Container]
+      Image=${my_hub_api_image_url}
+      ContainerName=my-hub-api
+      EnvironmentFile=/etc/my-hub-api.env
+      PublishPort=${my_hub_api_port}:${my_hub_api_port}
+
+      [Service]
+      Restart=always
+
+      [Install]
+      WantedBy=multi-user.target
   - path: /opt/my-hub/README.md
     owner: root:root
     permissions: "0644"
@@ -21,19 +41,35 @@ write_files:
       # my-hub runtime
 
       Podman and Quadlet are installed for running my-hub services.
+      The my-hub API Quadlet unit is prepared at:
 
-      Put Quadlet unit files in:
+      /etc/containers/systemd/my-hub-api.container
 
-      /etc/containers/systemd
+      OCIR private repository login:
+
+      sudo podman login ${ocir_endpoint}
+
+      Start or restart the API:
+
+      sudo systemctl daemon-reload
+      sudo systemctl enable --now my-hub-api.service
+      sudo systemctl restart my-hub-api.service
+
+      Deploy a new image tag:
+
+      sudo podman pull $(cat /etc/my-hub-api-image)
+      sudo systemctl restart my-hub-api.service
 
       Useful commands:
 
-      sudo systemctl daemon-reload
-      sudo systemctl enable --now <service-name>
-      sudo systemctl status <service-name>
-      sudo journalctl -u <service-name> -f
+      sudo systemctl status my-hub-api.service
+      sudo journalctl -u my-hub-api.service -f
       podman ps
-      podman logs <container-name>
+      podman logs my-hub-api
+
+      Additional Quadlet unit files can be placed in:
+
+      /etc/containers/systemd
 
       Secrets are not written through instance metadata.
       Add service secrets manually over Bastion SSH, for example:
