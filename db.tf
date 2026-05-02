@@ -22,6 +22,8 @@ resource "oci_core_network_security_group_security_rule" "mysql_ingress_api" {
 }
 
 resource "oci_mysql_mysql_db_system" "blog_api" {
+  depends_on = [oci_identity_policy.mysql_heatwave_management]
+
   count                  = var.enable_mysql_heatwave ? 1 : 0
   availability_domain    = local.availability_domain
   compartment_id         = var.compartment_ocid
@@ -83,6 +85,7 @@ resource "oci_database_autonomous_database" "warehouse" {
   display_name           = "blog-adw"
   is_free_tier           = true
   license_model          = "LICENSE_INCLUDED"
+  whitelisted_ips        = [module.network.vcn_id]
 }
 
 resource "oci_nosql_table" "blog_experiment" {

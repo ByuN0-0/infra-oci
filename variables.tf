@@ -145,6 +145,12 @@ variable "enable_mysql_heatwave" {
   default     = true
 }
 
+variable "mysql_iam_policy_group_name" {
+  type        = string
+  description = "OCI IAM group name that Terraform should grant permissions for managing MySQL HeatWave resources. Use the identity-domain syntax, for example 'Default'/'TerraformAdmins', when required."
+  default     = null
+}
+
 variable "mysql_shape_name" {
   type        = string
   description = "MySQL HeatWave DB system shape."
