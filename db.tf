@@ -39,14 +39,14 @@ resource "oci_mysql_mysql_db_system" "blog_api" {
 }
 
 resource "oci_core_network_security_group" "autonomous" {
-  count          = var.enable_autonomous_json_database || var.enable_autonomous_data_warehouse ? 1 : 0
+  count          = var.enable_autonomous_json_database ? 1 : 0
   compartment_id = var.compartment_ocid
   vcn_id         = module.network.vcn_id
   display_name   = "blog-autonomous-nsg"
 }
 
 resource "oci_core_network_security_group_security_rule" "autonomous_ingress_api" {
-  count                     = var.enable_autonomous_json_database || var.enable_autonomous_data_warehouse ? 1 : 0
+  count                     = var.enable_autonomous_json_database ? 1 : 0
   network_security_group_id = oci_core_network_security_group.autonomous[0].id
   direction                 = "INGRESS"
   protocol                  = "6"
@@ -83,9 +83,6 @@ resource "oci_database_autonomous_database" "warehouse" {
   display_name           = "blog-adw"
   is_free_tier           = true
   license_model          = "LICENSE_INCLUDED"
-  subnet_id              = module.network.private_subnet_id
-  private_endpoint_label = "blog-adw"
-  nsg_ids                = [oci_core_network_security_group.autonomous[0].id]
 }
 
 resource "oci_nosql_table" "blog_experiment" {
