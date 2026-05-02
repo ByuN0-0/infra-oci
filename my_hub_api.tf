@@ -6,12 +6,6 @@ locals {
     {
       PORT = tostring(var.my_hub_api_port)
     },
-    var.enable_mysql_heatwave ? {
-      MYSQL_HOST = oci_mysql_mysql_db_system.my_hub[0].endpoints[0].hostname
-      MYSQL_PORT = tostring(oci_mysql_mysql_db_system.my_hub[0].endpoints[0].port)
-      MYSQL_USER = var.mysql_admin_username
-      MYSQL_PASSWORD = var.mysql_admin_password
-    } : {},
     var.my_hub_api_environment_variables
   )
 }

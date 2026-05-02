@@ -93,7 +93,6 @@ variable "my_hub_api_boot_volume_size_gbs" {
 variable "ssh_authorized_keys" {
   type        = string
   description = "SSH public key for instance access."
-  sensitive   = true
 }
 
 variable "my_hub_api_repository_name" {

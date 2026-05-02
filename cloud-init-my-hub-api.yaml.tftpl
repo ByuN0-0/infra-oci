@@ -34,6 +34,11 @@ write_files:
       sudo journalctl -u <service-name> -f
       podman ps
       podman logs <container-name>
+
+      Secrets are not written through instance metadata.
+      Add service secrets manually over Bastion SSH, for example:
+
+      sudoedit /etc/my-hub-api.env
   - path: /opt/my-hub/examples/redis.container
     owner: root:root
     permissions: "0644"
