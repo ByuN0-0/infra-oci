@@ -1,6 +1,23 @@
 locals {
-  ocir_endpoint      = "${var.region}.ocir.io"
+  ocir_endpoint        = "${var.region}.ocir.io"
   my_hub_api_image_url = "${local.ocir_endpoint}/${var.namespace}/${var.my_hub_api_repository_name}:${var.my_hub_api_image_tag}"
+  cloudflare_ipv4_cidrs = toset([
+    "103.21.244.0/22",
+    "103.22.200.0/22",
+    "103.31.4.0/22",
+    "104.16.0.0/13",
+    "104.24.0.0/14",
+    "108.162.192.0/18",
+    "131.0.72.0/22",
+    "141.101.64.0/18",
+    "162.158.0.0/15",
+    "172.64.0.0/13",
+    "173.245.48.0/20",
+    "188.114.96.0/20",
+    "190.93.240.0/20",
+    "197.234.240.0/22",
+    "198.41.128.0/17",
+  ])
 
   my_hub_api_environment_variables = merge(
     {
@@ -45,10 +62,11 @@ resource "oci_core_network_security_group" "my_hub_api_compute" {
 }
 
 resource "oci_core_network_security_group_security_rule" "lb_ingress_http" {
+  for_each                  = local.cloudflare_ipv4_cidrs
   network_security_group_id = oci_core_network_security_group.my_hub_api_lb.id
   direction                 = "INGRESS"
   protocol                  = "6"
-  source                    = "0.0.0.0/0"
+  source                    = each.value
   source_type               = "CIDR_BLOCK"
 
   tcp_options {
@@ -60,10 +78,11 @@ resource "oci_core_network_security_group_security_rule" "lb_ingress_http" {
 }
 
 resource "oci_core_network_security_group_security_rule" "lb_ingress_https" {
+  for_each                  = local.cloudflare_ipv4_cidrs
   network_security_group_id = oci_core_network_security_group.my_hub_api_lb.id
   direction                 = "INGRESS"
   protocol                  = "6"
-  source                    = "0.0.0.0/0"
+  source                    = each.value
   source_type               = "CIDR_BLOCK"
 
   tcp_options {

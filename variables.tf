@@ -63,7 +63,7 @@ variable "availability_domain_index" {
 variable "my_hub_api_hostname" {
   type        = string
   description = "Public hostname to point manually at the my-hub API load balancer."
-  default     = "api.my-hub.biyeon.net"
+  default     = "blog-api.biyeon.net"
 }
 
 variable "my_hub_api_compute_shape" {
