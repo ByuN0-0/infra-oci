@@ -81,7 +81,7 @@ variable "my_hub_api_ocpus" {
 variable "my_hub_api_memory_gbs" {
   type        = number
   description = "Memory (GB) for the my-hub API compute instance."
-  default     = 6
+  default     = 24
 }
 
 variable "my_hub_api_boot_volume_size_gbs" {
