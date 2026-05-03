@@ -27,9 +27,10 @@ resource "oci_database_autonomous_database" "json" {
   db_name                = "MYHUBJSON"
   db_workload            = "AJD"
   display_name           = "my-hub-json"
-  is_free_tier           = true
-  license_model          = "LICENSE_INCLUDED"
-  whitelisted_ips        = [module.network.nat_gateway_ip]
+  is_free_tier                = true
+  is_mtls_connection_required = false
+  license_model               = "LICENSE_INCLUDED"
+  whitelisted_ips             = [module.network.nat_gateway_ip]
 
   lifecycle {
     ignore_changes = [admin_password]
@@ -43,9 +44,10 @@ resource "oci_database_autonomous_database" "warehouse" {
   db_name                = "MYHUBADW"
   db_workload            = "DW"
   display_name           = "my-hub-adw"
-  is_free_tier           = true
-  license_model          = "LICENSE_INCLUDED"
-  whitelisted_ips        = [module.network.nat_gateway_ip]
+  is_free_tier                = true
+  is_mtls_connection_required = false
+  license_model               = "LICENSE_INCLUDED"
+  whitelisted_ips             = [module.network.nat_gateway_ip]
 
   lifecycle {
     ignore_changes = [admin_password]
