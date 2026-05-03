@@ -30,7 +30,7 @@ resource "oci_database_autonomous_database" "json" {
   is_free_tier                = true
   is_mtls_connection_required = false
   license_model               = "LICENSE_INCLUDED"
-  whitelisted_ips             = [module.network.nat_gateway_ip]
+  whitelisted_ips             = ["0.0.0.0/0"]
 
   lifecycle {
     ignore_changes = [admin_password]
@@ -47,7 +47,7 @@ resource "oci_database_autonomous_database" "warehouse" {
   is_free_tier                = true
   is_mtls_connection_required = false
   license_model               = "LICENSE_INCLUDED"
-  whitelisted_ips             = [module.network.nat_gateway_ip]
+  whitelisted_ips             = ["0.0.0.0/0"]
 
   lifecycle {
     ignore_changes = [admin_password]
