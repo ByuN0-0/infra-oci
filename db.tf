@@ -25,6 +25,7 @@ resource "oci_database_autonomous_database" "json" {
   display_name           = "my-hub-json"
   is_free_tier           = true
   license_model          = "LICENSE_INCLUDED"
+  whitelisted_ips        = [module.network.nat_gateway_ip]
 }
 
 resource "oci_database_autonomous_database" "warehouse" {

@@ -13,6 +13,11 @@ output "private_subnet_id" {
   value       = module.network.private_subnet_id
 }
 
+output "nat_gateway_ip" {
+  description = "Public IP address used by the NAT gateway."
+  value       = module.network.nat_gateway_ip
+}
+
 output "my_hub_api_compute_instance_id" {
   description = "my-hub API compute instance OCID."
   value       = oci_core_instance.my_hub_api.id
