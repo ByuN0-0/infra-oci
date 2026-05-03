@@ -40,3 +40,34 @@ podman logs my-hub-api
 sudo journalctl -u my-hub-api.service -f
 curl http://127.0.0.1:8080/health
 ```
+
+## my-hub secrets
+
+Terraform creates a dedicated OCI Vault and KMS key for my-hub secrets, but it
+does not create secret values. Put secret values in OCI Vault through Console
+or OCI CLI so database passwords do not end up in Terraform state.
+
+Create a secret after `terraform apply`:
+
+```bash
+VAULT_ID="$(terraform output -raw my_hub_vault_id)"
+KEY_ID="$(terraform output -raw my_hub_secrets_key_id)"
+COMPARTMENT_ID="$(terraform output -raw compartment_ocid)"
+
+oci vault secret create-base64 \
+  --compartment-id "${COMPARTMENT_ID}" \
+  --vault-id "${VAULT_ID}" \
+  --key-id "${KEY_ID}" \
+  --secret-name "my-hub-mysql-dsn" \
+  --secret-content-content "$(printf %s 'secret-value-here' | base64 | tr -d '\n')"
+```
+
+Read a secret from the VM with instance principal auth:
+
+```bash
+oci secrets secret-bundle get \
+  --auth instance_principal \
+  --secret-id "<secret-ocid>" \
+  --query 'data."secret-bundle-content".content' \
+  --raw-output | base64 -d
+```

@@ -13,6 +13,11 @@ output "private_subnet_id" {
   value       = module.network.private_subnet_id
 }
 
+output "compartment_ocid" {
+  description = "Compartment OCID used by this stack."
+  value       = var.compartment_ocid
+}
+
 output "nat_gateway_ip" {
   description = "Public IP address used by the NAT gateway."
   value       = module.network.nat_gateway_ip
@@ -76,6 +81,21 @@ output "autonomous_json_database_id" {
 output "autonomous_data_warehouse_id" {
   description = "Autonomous Data Warehouse OCID."
   value       = var.enable_autonomous_data_warehouse ? oci_database_autonomous_database.warehouse[0].id : null
+}
+
+output "my_hub_vault_id" {
+  description = "OCI Vault OCID for my-hub secrets."
+  value       = oci_kms_vault.my_hub.id
+}
+
+output "my_hub_vault_management_endpoint" {
+  description = "OCI Vault management endpoint for my-hub secrets."
+  value       = oci_kms_vault.my_hub.management_endpoint
+}
+
+output "my_hub_secrets_key_id" {
+  description = "OCI KMS key OCID used to encrypt my-hub secrets."
+  value       = oci_kms_key.my_hub_secrets.id
 }
 
 output "namespace" {
