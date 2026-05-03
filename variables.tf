@@ -137,6 +137,25 @@ variable "my_hub_api_lb_max_bandwidth_mbps" {
   default     = 10
 }
 
+variable "my_hub_api_origin_certificate_public_certificate" {
+  type        = string
+  description = "Public certificate PEM for the my-hub API HTTPS load balancer listener, for example a Cloudflare Origin Certificate."
+  default     = null
+}
+
+variable "my_hub_api_origin_certificate_private_key" {
+  type        = string
+  description = "Private key PEM for the my-hub API HTTPS load balancer listener."
+  sensitive   = true
+  default     = null
+}
+
+variable "my_hub_api_origin_certificate_ca_certificate" {
+  type        = string
+  description = "Optional CA certificate PEM chain for the my-hub API HTTPS load balancer listener."
+  default     = null
+}
+
 variable "mysql_admin_username" {
   type        = string
   description = "Admin username for MySQL HeatWave."

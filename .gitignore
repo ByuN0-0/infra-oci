@@ -13,6 +13,12 @@
 .env
 .env.*
 
+# 로컬 인증서/개인키 파일
+*.pem
+*.key
+*.crt
+*.cert
+
 # 로그 파일
 *.log
 crash.log

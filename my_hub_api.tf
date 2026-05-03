@@ -242,3 +242,26 @@ resource "oci_load_balancer_listener" "my_hub_api_http" {
   port                     = 80
   protocol                 = "HTTP"
 }
+
+resource "oci_load_balancer_certificate" "my_hub_api_origin" {
+  count              = var.my_hub_api_origin_certificate_public_certificate != null || var.my_hub_api_origin_certificate_private_key != null ? 1 : 0
+  load_balancer_id   = oci_load_balancer_load_balancer.my_hub_api.id
+  certificate_name   = "my-hub-api-origin"
+  public_certificate = var.my_hub_api_origin_certificate_public_certificate
+  private_key        = var.my_hub_api_origin_certificate_private_key
+  ca_certificate     = var.my_hub_api_origin_certificate_ca_certificate
+}
+
+resource "oci_load_balancer_listener" "my_hub_api_https" {
+  count                    = length(oci_load_balancer_certificate.my_hub_api_origin)
+  load_balancer_id         = oci_load_balancer_load_balancer.my_hub_api.id
+  name                     = "my-hub-api-https"
+  default_backend_set_name = oci_load_balancer_backend_set.my_hub_api.name
+  port                     = 443
+  protocol                 = "HTTP"
+
+  ssl_configuration {
+    certificate_name        = oci_load_balancer_certificate.my_hub_api_origin[0].certificate_name
+    verify_peer_certificate = false
+  }
+}
