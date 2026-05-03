@@ -16,29 +16,6 @@ resource "oci_mysql_mysql_db_system" "my_hub" {
   port_x                 = 33060
 }
 
-resource "oci_core_network_security_group" "autonomous" {
-  count          = var.enable_autonomous_json_database ? 1 : 0
-  compartment_id = var.compartment_ocid
-  vcn_id         = module.network.vcn_id
-  display_name   = "my-hub-autonomous-nsg"
-}
-
-resource "oci_core_network_security_group_security_rule" "autonomous_ingress_api" {
-  count                     = var.enable_autonomous_json_database ? 1 : 0
-  network_security_group_id = oci_core_network_security_group.autonomous[0].id
-  direction                 = "INGRESS"
-  protocol                  = "6"
-  source                    = oci_core_network_security_group.my_hub_api_compute.id
-  source_type               = "NETWORK_SECURITY_GROUP"
-
-  tcp_options {
-    destination_port_range {
-      min = 1522
-      max = 1522
-    }
-  }
-}
-
 resource "oci_database_autonomous_database" "json" {
   count                  = var.enable_autonomous_json_database ? 1 : 0
   compartment_id         = var.compartment_ocid
@@ -48,9 +25,6 @@ resource "oci_database_autonomous_database" "json" {
   display_name           = "my-hub-json"
   is_free_tier           = true
   license_model          = "LICENSE_INCLUDED"
-  subnet_id              = module.network.private_subnet_id
-  private_endpoint_label = "my-hub-json"
-  nsg_ids                = [oci_core_network_security_group.autonomous[0].id]
 }
 
 resource "oci_database_autonomous_database" "warehouse" {
