@@ -174,9 +174,16 @@ variable "mysql_data_storage_size_in_gb" {
   default     = 50
 }
 
-variable "autonomous_admin_password" {
+variable "autonomous_json_admin_password" {
   type        = string
-  description = "Admin password for Autonomous Database resources."
+  description = "Admin password for the Autonomous JSON Database."
+  sensitive   = true
+  default     = null
+}
+
+variable "autonomous_data_warehouse_admin_password" {
+  type        = string
+  description = "Admin password for the Autonomous Data Warehouse."
   sensitive   = true
   default     = null
 }

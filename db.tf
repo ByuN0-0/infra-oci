@@ -19,7 +19,7 @@ resource "oci_mysql_mysql_db_system" "my_hub" {
 resource "oci_database_autonomous_database" "json" {
   count                  = var.enable_autonomous_json_database ? 1 : 0
   compartment_id         = var.compartment_ocid
-  admin_password         = var.autonomous_admin_password
+  admin_password         = var.autonomous_json_admin_password
   db_name                = "MYHUBJSON"
   db_workload            = "AJD"
   display_name           = "my-hub-json"
@@ -31,7 +31,7 @@ resource "oci_database_autonomous_database" "json" {
 resource "oci_database_autonomous_database" "warehouse" {
   count                  = var.enable_autonomous_data_warehouse ? 1 : 0
   compartment_id         = var.compartment_ocid
-  admin_password         = var.autonomous_admin_password
+  admin_password         = var.autonomous_data_warehouse_admin_password
   db_name                = "MYHUBADW"
   db_workload            = "DW"
   display_name           = "my-hub-adw"

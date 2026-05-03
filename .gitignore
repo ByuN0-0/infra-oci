@@ -9,6 +9,10 @@
 *.tfvars
 *.tfvars.json
 
+# 로컬 환경 변수 파일
+.env
+.env.*
+
 # 로그 파일
 *.log
 crash.log
