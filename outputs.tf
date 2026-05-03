@@ -73,11 +73,6 @@ output "autonomous_data_warehouse_id" {
   value       = var.enable_autonomous_data_warehouse ? oci_database_autonomous_database.warehouse[0].id : null
 }
 
-output "nosql_table_id" {
-  description = "Oracle NoSQL experiment table OCID."
-  value       = var.enable_nosql_table ? oci_nosql_table.my_hub_experiment[0].id : null
-}
-
 output "namespace" {
   description = "Object Storage namespace."
   value       = var.namespace

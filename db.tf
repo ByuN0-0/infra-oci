@@ -63,17 +63,3 @@ resource "oci_database_autonomous_database" "warehouse" {
   license_model          = "LICENSE_INCLUDED"
   whitelisted_ips        = [module.network.vcn_id]
 }
-
-resource "oci_nosql_table" "my_hub_experiment" {
-  count          = var.enable_nosql_table ? 1 : 0
-  compartment_id = var.compartment_ocid
-  name           = var.nosql_table_name
-  ddl_statement  = "CREATE TABLE IF NOT EXISTS ${var.nosql_table_name} (id STRING, payload JSON, created_at TIMESTAMP(6), PRIMARY KEY(id))"
-
-  table_limits {
-    capacity_mode      = "PROVISIONED"
-    max_read_units     = 50
-    max_write_units    = 50
-    max_storage_in_gbs = 25
-  }
-}

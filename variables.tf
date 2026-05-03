@@ -193,18 +193,6 @@ variable "enable_autonomous_data_warehouse" {
   default     = true
 }
 
-variable "enable_nosql_table" {
-  type        = bool
-  description = "Whether to create the Always Free Oracle NoSQL table."
-  default     = true
-}
-
-variable "nosql_table_name" {
-  type        = string
-  description = "Name for the Oracle NoSQL experiment table."
-  default     = "my_hub_experiment"
-}
-
 variable "namespace" {
   type        = string
   description = "Object Storage namespace."
