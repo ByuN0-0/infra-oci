@@ -46,6 +46,7 @@ resource "oci_database_autonomous_database" "json" {
   db_name                = "MYHUBJSON"
   db_workload            = "AJD"
   display_name           = "my-hub-json"
+  is_free_tier           = true
   license_model          = "LICENSE_INCLUDED"
   subnet_id              = module.network.private_subnet_id
   private_endpoint_label = "my-hub-json"

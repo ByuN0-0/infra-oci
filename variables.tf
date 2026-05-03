@@ -183,8 +183,8 @@ variable "autonomous_admin_password" {
 
 variable "enable_autonomous_json_database" {
   type        = bool
-  description = "Whether to create Autonomous JSON Database. OCI Terraform currently does not allow AJD with is_free_tier=true, so this defaults to false to avoid accidental paid resources."
-  default     = false
+  description = "Whether to create an Always Free Autonomous JSON Database."
+  default     = true
 }
 
 variable "enable_autonomous_data_warehouse" {
