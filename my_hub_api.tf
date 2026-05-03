@@ -21,7 +21,11 @@ locals {
 
   my_hub_api_environment_variables = merge(
     {
-      PORT = tostring(var.my_hub_api_port)
+      PORT                = tostring(var.my_hub_api_port)
+      OCI_REGION          = var.region
+      OCI_VAULT_ID        = oci_kms_vault.my_hub.id
+      OCI_SECRETS_ENABLED = "true"
+      OCI_ENV_SECRET      = var.my_hub_api_environment_secret_name
     },
     var.my_hub_api_environment_variables
   )

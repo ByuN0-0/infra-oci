@@ -125,6 +125,12 @@ variable "my_hub_api_environment_variables" {
   default     = {}
 }
 
+variable "my_hub_api_environment_secret_name" {
+  type        = string
+  description = "OCI Vault secret name containing the my-hub API environment file."
+  default     = "my-hub-api-env"
+}
+
 variable "my_hub_api_lb_min_bandwidth_mbps" {
   type        = number
   description = "Minimum bandwidth for the flexible public load balancer."
