@@ -45,7 +45,7 @@ resource "oci_database_autonomous_database" "warehouse" {
   display_name           = "my-hub-adw"
   is_free_tier           = true
   license_model          = "LICENSE_INCLUDED"
-  whitelisted_ips        = [module.network.vcn_id]
+  whitelisted_ips        = [module.network.nat_gateway_ip]
 
   lifecycle {
     ignore_changes = [admin_password]
