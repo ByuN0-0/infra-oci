@@ -14,6 +14,10 @@ resource "oci_mysql_mysql_db_system" "my_hub" {
   is_highly_available    = false
   port                   = 3306
   port_x                 = 33060
+
+  lifecycle {
+    ignore_changes = [admin_password]
+  }
 }
 
 resource "oci_database_autonomous_database" "json" {
@@ -26,6 +30,10 @@ resource "oci_database_autonomous_database" "json" {
   is_free_tier           = true
   license_model          = "LICENSE_INCLUDED"
   whitelisted_ips        = [module.network.nat_gateway_ip]
+
+  lifecycle {
+    ignore_changes = [admin_password]
+  }
 }
 
 resource "oci_database_autonomous_database" "warehouse" {
@@ -38,4 +46,8 @@ resource "oci_database_autonomous_database" "warehouse" {
   is_free_tier           = true
   license_model          = "LICENSE_INCLUDED"
   whitelisted_ips        = [module.network.vcn_id]
+
+  lifecycle {
+    ignore_changes = [admin_password]
+  }
 }
