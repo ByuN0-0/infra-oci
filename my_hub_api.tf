@@ -195,6 +195,12 @@ resource "oci_core_instance" "my_hub_api" {
     ssh_authorized_keys = var.ssh_authorized_keys
   }
 
+  lifecycle {
+    ignore_changes = [
+      metadata["user_data"]
+    ]
+  }
+
   depends_on = [
     oci_artifacts_container_repository.my_hub_api,
     oci_identity_policy.my_hub_api_compute_ocir_read,
