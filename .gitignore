@@ -23,6 +23,9 @@
 *.log
 crash.log
 
+# DB wallet archives
+Wallet_*.zip
+
 # 로컬 설정/재정의 파일
 override.tf
 override.tf.json

@@ -184,6 +184,10 @@ resource "oci_core_instance" "my_hub_api" {
   metadata = {
     user_data = base64encode(templatefile("${path.module}/cloud-init-my-hub-api.yaml.tftpl", {
       ocir_endpoint                    = local.ocir_endpoint
+      object_storage_namespace         = var.namespace
+      wallet_bucket_name               = module.object_storage.bucket_name
+      adw_wallet_object_name           = var.my_hub_api_adw_wallet_object_name
+      ajd_wallet_object_name           = var.my_hub_api_ajd_wallet_object_name
       my_hub_api_image_url             = local.my_hub_api_image_url
       my_hub_api_environment_variables = local.my_hub_api_environment_variables
       my_hub_api_port                  = var.my_hub_api_port
@@ -193,7 +197,9 @@ resource "oci_core_instance" "my_hub_api" {
 
   depends_on = [
     oci_artifacts_container_repository.my_hub_api,
-    oci_identity_policy.my_hub_api_compute_ocir_read
+    oci_identity_policy.my_hub_api_compute_ocir_read,
+    oci_identity_policy.my_hub_api_secret_read,
+    oci_identity_policy.my_hub_api_wallet_object_read
   ]
 }
 

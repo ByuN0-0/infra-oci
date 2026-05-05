@@ -2,6 +2,139 @@
 bootcmd:
   - mkdir -p /opt/my-hub/apps /opt/my-hub/examples /etc/containers/systemd
 write_files:
+  - path: /usr/local/sbin/my-hub-api-bootstrap
+    owner: root:root
+    permissions: "0755"
+    content: |
+      #!/usr/bin/env bash
+      set -euo pipefail
+
+      OCIR_ENDPOINT="${ocir_endpoint}"
+      OBJECT_STORAGE_NAMESPACE="${object_storage_namespace}"
+      WALLET_BUCKET_NAME="${wallet_bucket_name}"
+      ADW_WALLET_OBJECT_NAME="${adw_wallet_object_name}"
+      AJD_WALLET_OBJECT_NAME="${ajd_wallet_object_name}"
+      API_ENV_FILE="/etc/my-hub-api.env"
+      API_IMAGE_FILE="/etc/my-hub-api-image"
+      API_QUADLET_FILE="/etc/containers/systemd/my-hub-api.container"
+      WALLET_ROOT="/opt/my-hub/wallets"
+
+      install_packages() {
+        dnf install -y podman unzip python36-oci-cli || \
+          dnf install -y podman unzip python3-oci-cli || \
+          dnf install -y podman unzip
+      }
+
+      load_bootstrap_env() {
+        set -a
+        # shellcheck disable=SC1090
+        . "$API_ENV_FILE"
+        set +a
+      }
+
+      refresh_env_from_vault() {
+        load_bootstrap_env
+        if [[ -z "$${OCI_ENV_SECRET:-}" || -z "$${OCI_VAULT_ID:-}" ]]; then
+          echo "OCI_ENV_SECRET or OCI_VAULT_ID is missing; keeping metadata env file."
+          return
+        fi
+
+        if ! command -v oci >/dev/null 2>&1; then
+          echo "OCI CLI is not installed; cannot fetch Vault env secret."
+          return
+        fi
+
+        for attempt in $(seq 1 30); do
+          if oci secrets secret-bundle get-secret-bundle-by-name \
+            --auth instance_principal \
+            --vault-id "$${OCI_VAULT_ID}" \
+            --secret-name "$${OCI_ENV_SECRET}" \
+            --query 'data."secret-bundle-content".content' \
+            --raw-output | base64 --decode >/run/my-hub-api.env; then
+            install -m 0600 -o root -g root /run/my-hub-api.env "$API_ENV_FILE"
+            rm -f /run/my-hub-api.env
+            return
+          fi
+
+          echo "Waiting for instance principal secret access ($${attempt}/30)."
+          sleep 10
+        done
+
+        echo "Could not fetch Vault env secret; keeping metadata env file."
+      }
+
+      login_ocir() {
+        load_bootstrap_env
+        if [[ -z "$${OCIR_USERNAME:-}" || -z "$${OCIR_AUTH_TOKEN:-}" ]]; then
+          echo "OCIR_USERNAME or OCIR_AUTH_TOKEN is missing; skipping OCIR login."
+          return
+        fi
+
+        printf '%s' "$${OCIR_AUTH_TOKEN}" | podman login "$OCIR_ENDPOINT" \
+          --username "$${OCIR_USERNAME}" \
+          --password-stdin
+      }
+
+      download_wallet() {
+        local object_name="$1"
+        local target_dir="$2"
+        local zip_path="/run/$(basename "$object_name")"
+
+        mkdir -p "$target_dir"
+        if [[ -z "$object_name" ]]; then
+          echo "Wallet object name is empty for $target_dir; skipping."
+          return
+        fi
+
+        if ! command -v oci >/dev/null 2>&1; then
+          echo "OCI CLI is not installed; cannot download $object_name."
+          return
+        fi
+
+        if oci os object get \
+          --auth instance_principal \
+          --namespace "$OBJECT_STORAGE_NAMESPACE" \
+          --bucket-name "$WALLET_BUCKET_NAME" \
+          --name "$object_name" \
+          --file "$zip_path"; then
+          unzip -o "$zip_path" -d "$target_dir"
+          rm -f "$zip_path"
+        else
+          echo "Could not download wallet object $object_name; skipping."
+        fi
+      }
+
+      prepare_wallets() {
+        mkdir -p "$WALLET_ROOT/adw" "$WALLET_ROOT/ajd"
+        download_wallet "$ADW_WALLET_OBJECT_NAME" "$WALLET_ROOT/adw"
+        download_wallet "$AJD_WALLET_OBJECT_NAME" "$WALLET_ROOT/ajd"
+        chmod -R a+rX "$WALLET_ROOT"
+        chcon -Rt container_file_t "$WALLET_ROOT" 2>/dev/null || true
+      }
+
+      ensure_wallet_mount() {
+        if ! grep -q "^Volume=$WALLET_ROOT:$WALLET_ROOT:" "$API_QUADLET_FILE"; then
+          sed -i "/^EnvironmentFile=/a Volume=$WALLET_ROOT:$WALLET_ROOT:ro,z" "$API_QUADLET_FILE"
+        fi
+      }
+
+      start_api() {
+        systemctl daemon-reload
+        systemctl enable --now podman.socket
+        if [[ -f "$WALLET_ROOT/adw/cwallet.sso" && -f "$WALLET_ROOT/ajd/cwallet.sso" ]]; then
+          systemctl enable --now my-hub-api.service
+        else
+          echo "Wallet files are missing; enabling service but not starting it yet."
+          systemctl enable my-hub-api.service
+        fi
+      }
+
+      install_packages
+      refresh_env_from_vault
+      login_ocir
+      prepare_wallets
+      ensure_wallet_mount
+      start_api
   - path: /etc/my-hub-api.env
     owner: root:root
     permissions: "0600"
@@ -27,6 +160,7 @@ write_files:
       Image=${my_hub_api_image_url}
       ContainerName=my-hub-api
       EnvironmentFile=/etc/my-hub-api.env
+      Volume=/opt/my-hub/wallets:/opt/my-hub/wallets:ro,z
       PublishPort=${my_hub_api_port}:${my_hub_api_port}
 
       [Service]
@@ -45,9 +179,11 @@ write_files:
 
       /etc/containers/systemd/my-hub-api.container
 
-      OCIR private repository login:
-
-      sudo podman login ${ocir_endpoint}
+      New instances run /usr/local/sbin/my-hub-api-bootstrap through cloud-init.
+      The bootstrap reads OCI_ENV_SECRET from Vault, logs in to OCIR when
+      OCIR_USERNAME and OCIR_AUTH_TOKEN are present, downloads ADW/AJD wallets
+      from Object Storage, applies permissions and SELinux labels, and starts
+      my-hub-api.service.
 
       Start or restart the API:
 
@@ -72,9 +208,8 @@ write_files:
       /etc/containers/systemd
 
       Secrets are not written through instance metadata.
-      Add service secrets manually over Bastion SSH, for example:
+      Update service secrets in OCI Vault secret OCI_ENV_SECRET.
 
-      sudoedit /etc/my-hub-api.env
   - path: /opt/my-hub/examples/redis.container
     owner: root:root
     permissions: "0644"
@@ -94,7 +229,5 @@ write_files:
       [Install]
       WantedBy=multi-user.target
 runcmd:
-  - dnf install -y podman
   - mkdir -p /etc/containers/systemd /opt/my-hub/apps /opt/my-hub/examples
-  - systemctl enable --now podman.socket
-  - systemctl daemon-reload
+  - /usr/local/sbin/my-hub-api-bootstrap

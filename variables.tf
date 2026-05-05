@@ -75,13 +75,13 @@ variable "my_hub_api_compute_shape" {
 variable "my_hub_api_ocpus" {
   type        = number
   description = "OCPUs for the my-hub API compute instance."
-  default     = 2
+  default     = 4
 }
 
 variable "my_hub_api_memory_gbs" {
   type        = number
   description = "Memory (GB) for the my-hub API compute instance."
-  default     = 18
+  default     = 24
 }
 
 variable "my_hub_api_boot_volume_size_gbs" {
@@ -123,6 +123,18 @@ variable "my_hub_api_environment_variables" {
   type        = map(string)
   description = "Additional non-secret environment variables for the my-hub API."
   default     = {}
+}
+
+variable "my_hub_api_adw_wallet_object_name" {
+  type        = string
+  description = "Object Storage object name for the ADW wallet zip used by my-hub API bootstrap."
+  default     = "wallets/Wallet_MYHUBADW.zip"
+}
+
+variable "my_hub_api_ajd_wallet_object_name" {
+  type        = string
+  description = "Object Storage object name for the AJD wallet zip used by my-hub API bootstrap."
+  default     = "wallets/Wallet_MYHUBJSON.zip"
 }
 
 variable "my_hub_api_lb_min_bandwidth_mbps" {

@@ -26,6 +26,49 @@ sudo systemctl start my-hub-api.service
 sudo systemctl status my-hub-api.service
 ```
 
+## New VM bootstrap
+
+New `my-hub-api` instances run `/usr/local/sbin/my-hub-api-bootstrap` from
+cloud-init. The bootstrap can do the previously manual work automatically:
+
+- read `my-hub-api-env` from OCI Vault through instance principal auth
+- log in to private OCIR when `OCIR_USERNAME` and `OCIR_AUTH_TOKEN` are present
+- download ADW/AJD wallet zips from Object Storage
+- unzip wallets under `/opt/my-hub/wallets`
+- apply file permissions and SELinux labels
+- start `my-hub-api.service`
+
+Add these lines to the `my-hub-api-env` Vault secret if you want OCIR login to
+be automatic on new instances:
+
+```env
+OCIR_USERNAME=<namespace>/<oci-user-name>
+OCIR_AUTH_TOKEN=<oci-auth-token>
+```
+
+Upload fresh wallet zips to the private Object Storage bucket:
+
+```bash
+./scripts/upload-my-hub-wallets.sh
+```
+
+The defaults match Terraform:
+
+```text
+bucket: shared-storage
+ADW object: wallets/Wallet_MYHUBADW.zip
+AJD object: wallets/Wallet_MYHUBJSON.zip
+```
+
+Override paths or object names when needed:
+
+```bash
+ADW_WALLET_FILE=/path/to/Wallet_MYHUBADW.zip \
+AJD_WALLET_FILE=/path/to/Wallet_MYHUBJSON.zip \
+BUCKET_NAME=shared-storage \
+./scripts/upload-my-hub-wallets.sh
+```
+
 ## Deploy a refreshed image
 
 ```bash
