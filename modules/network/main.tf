@@ -80,26 +80,6 @@ resource "oci_core_security_list" "public" {
   vcn_id         = oci_core_vcn.this.id
   display_name   = "${var.vcn_name}-public-sl"
 
-  ingress_security_rules {
-    protocol    = "6"
-    source      = "0.0.0.0/0"
-    source_type = "CIDR_BLOCK"
-    tcp_options {
-      min = 80
-      max = 80
-    }
-  }
-
-  ingress_security_rules {
-    protocol    = "6"
-    source      = "0.0.0.0/0"
-    source_type = "CIDR_BLOCK"
-    tcp_options {
-      min = 443
-      max = 443
-    }
-  }
-
   egress_security_rules {
     protocol         = "all"
     destination      = "0.0.0.0/0"
