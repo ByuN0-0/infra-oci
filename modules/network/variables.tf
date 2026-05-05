@@ -27,3 +27,9 @@ variable "my_hub_api_port" {
   type        = number
   description = "Port exposed by the my-hub API."
 }
+
+variable "public_http_ingress_cidrs" {
+  type        = set(string)
+  description = "CIDR blocks allowed to reach HTTP/HTTPS resources in the public subnet."
+  default     = []
+}

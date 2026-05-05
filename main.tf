@@ -7,13 +7,14 @@ locals {
 }
 
 module "network" {
-  source               = "./modules/network"
-  compartment_ocid     = var.compartment_ocid
-  vcn_name             = var.vcn_name
-  vcn_cidr             = var.vcn_cidr
-  public_subnet_cidr   = var.public_subnet_cidr
-  private_subnet_cidr  = var.private_subnet_cidr
-  my_hub_api_port    = var.my_hub_api_port
+  source                    = "./modules/network"
+  compartment_ocid          = var.compartment_ocid
+  vcn_name                  = var.vcn_name
+  vcn_cidr                  = var.vcn_cidr
+  public_subnet_cidr        = var.public_subnet_cidr
+  private_subnet_cidr       = var.private_subnet_cidr
+  my_hub_api_port           = var.my_hub_api_port
+  public_http_ingress_cidrs = local.cloudflare_ipv4_cidrs
   providers = {
     oci = oci
   }
