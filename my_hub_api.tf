@@ -167,26 +167,6 @@ resource "oci_core_instance" "my_hub_api" {
   display_name        = "my-hub-api"
   shape               = var.my_hub_api_compute_shape
 
-  agent_config {
-    is_management_disabled = false
-    is_monitoring_disabled = false
-
-    plugins_config {
-      name          = "Bastion"
-      desired_state = "ENABLED"
-    }
-
-    plugins_config {
-      name          = "Compute Instance Monitoring"
-      desired_state = "ENABLED"
-    }
-
-    plugins_config {
-      name          = "Compute Instance Run Command"
-      desired_state = "ENABLED"
-    }
-  }
-
   shape_config {
     ocpus         = var.my_hub_api_ocpus
     memory_in_gbs = var.my_hub_api_memory_gbs
@@ -232,22 +212,6 @@ resource "oci_core_instance" "my_hub_api" {
     oci_identity_policy.my_hub_api_compute_ocir_read,
     oci_identity_policy.my_hub_api_secret_read,
     oci_identity_policy.my_hub_api_wallet_object_read
-  ]
-}
-
-resource "oci_identity_dynamic_group" "my_hub_api_run_command_instances" {
-  compartment_id = var.tenancy_ocid
-  name           = "my-hub-api-run-command-instances"
-  description    = "my-hub API instances allowed to consume OCI Run Command executions."
-  matching_rule  = "ANY {instance.id = '${oci_core_instance.my_hub_api.id}'}"
-}
-
-resource "oci_identity_policy" "my_hub_api_run_command_consume" {
-  compartment_id = var.tenancy_ocid
-  name           = "my-hub-api-run-command-consume"
-  description    = "Allow the my-hub API instance to consume OCI Run Command executions."
-  statements = [
-    "Allow dynamic-group ${oci_identity_dynamic_group.my_hub_api_run_command_instances.name} to use instance-agent-command-execution-family in compartment id ${var.compartment_ocid}"
   ]
 }
 
