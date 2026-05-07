@@ -168,6 +168,59 @@ write_files:
 
       [Install]
       WantedBy=multi-user.target
+  - path: /usr/local/sbin/myhub-deploy-my-hub-api
+    owner: root:root
+    permissions: "0755"
+    content: |
+      #!/usr/bin/env bash
+      set -euo pipefail
+
+      IMAGE="$${1:-${my_hub_api_image_url}}"
+      SERVICE_NAME="my-hub-api.service"
+      HEALTH_URL="http://127.0.0.1:${my_hub_api_port}/health"
+      HEALTH_RETRIES=30
+      HEALTH_INTERVAL_SECONDS=2
+
+      case "$IMAGE" in
+        ${ocir_endpoint}/${object_storage_namespace}/my-hub-api:*) ;;
+        *)
+          echo "Refusing unexpected image: $IMAGE" >&2
+          exit 2
+          ;;
+      esac
+
+      echo "Pulling $IMAGE"
+      podman pull --quiet "$IMAGE"
+
+      echo "Restarting $SERVICE_NAME"
+      systemctl restart "$SERVICE_NAME"
+      systemctl is-active --quiet "$SERVICE_NAME"
+
+      echo "Waiting for health: $HEALTH_URL"
+      attempt=1
+      while [ "$attempt" -le "$HEALTH_RETRIES" ]; do
+        if curl -fsS "$HEALTH_URL" >/tmp/my-hub-api-health 2>/tmp/my-hub-api-health.err; then
+          printf 'Health OK: '
+          cat /tmp/my-hub-api-health
+          printf '\n'
+          exit 0
+        fi
+
+        printf 'Health pending (%s/%s)\n' "$attempt" "$HEALTH_RETRIES"
+        attempt=$((attempt + 1))
+        sleep "$HEALTH_INTERVAL_SECONDS"
+      done
+
+      echo 'Health check failed'
+      cat /tmp/my-hub-api-health.err >&2 || true
+      systemctl status "$SERVICE_NAME" --no-pager -l || true
+      journalctl -u "$SERVICE_NAME" -n 80 --no-pager || true
+      exit 1
+  - path: /etc/sudoers.d/101-oracle-cloud-agent-run-command
+    owner: root:root
+    permissions: "0440"
+    content: |
+      ocarun ALL=(root) NOPASSWD: /usr/local/sbin/myhub-deploy-my-hub-api
   - path: /opt/my-hub/README.md
     owner: root:root
     permissions: "0644"
