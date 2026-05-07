@@ -14,7 +14,7 @@ module "network" {
   public_subnet_cidr        = var.public_subnet_cidr
   private_subnet_cidr       = var.private_subnet_cidr
   my_hub_api_port           = var.my_hub_api_port
-  public_http_ingress_cidrs = local.cloudflare_ipv4_cidrs
+  public_http_ingress_cidrs = local.public_http_ingress_cidrs
   providers = {
     oci = oci
   }
