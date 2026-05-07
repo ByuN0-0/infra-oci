@@ -125,6 +125,12 @@ variable "my_hub_api_environment_variables" {
   default     = {}
 }
 
+variable "my_hub_api_environment_secret_name" {
+  type        = string
+  description = "OCI Vault secret name that stores the full my-hub API runtime environment."
+  default     = "my-hub-api-env"
+}
+
 variable "my_hub_api_adw_wallet_object_name" {
   type        = string
   description = "Object Storage object name for the ADW wallet zip used by my-hub API bootstrap."
