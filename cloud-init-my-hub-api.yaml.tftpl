@@ -10,14 +10,7 @@ write_files:
       set -euo pipefail
 
       OCIR_ENDPOINT="${ocir_endpoint}"
-      OBJECT_STORAGE_NAMESPACE="${object_storage_namespace}"
-      WALLET_BUCKET_NAME="${wallet_bucket_name}"
-      ADW_WALLET_OBJECT_NAME="${adw_wallet_object_name}"
-      AJD_WALLET_OBJECT_NAME="${ajd_wallet_object_name}"
       API_ENV_FILE="/etc/my-hub-api.env"
-      API_IMAGE_FILE="/etc/my-hub-api-image"
-      API_QUADLET_FILE="/etc/containers/systemd/my-hub-api.container"
-      WALLET_ROOT="/opt/my-hub/wallets"
 
       load_bootstrap_env() {
         set -a
@@ -69,49 +62,6 @@ write_files:
           --password-stdin
       }
 
-      download_wallet() {
-        local object_name="$1"
-        local target_dir="$2"
-        local zip_path="/run/$(basename "$object_name")"
-
-        mkdir -p "$target_dir"
-        if [[ -z "$object_name" ]]; then
-          echo "Wallet object name is empty for $target_dir; skipping."
-          return
-        fi
-
-        if ! command -v oci >/dev/null 2>&1; then
-          echo "OCI CLI is not installed; cannot download $object_name."
-          return
-        fi
-
-        if oci os object get \
-          --auth instance_principal \
-          --namespace "$OBJECT_STORAGE_NAMESPACE" \
-          --bucket-name "$WALLET_BUCKET_NAME" \
-          --name "$object_name" \
-          --file "$zip_path"; then
-          unzip -o "$zip_path" -d "$target_dir"
-          rm -f "$zip_path"
-        else
-          echo "Could not download wallet object $object_name; skipping."
-        fi
-      }
-
-      prepare_wallets() {
-        mkdir -p "$WALLET_ROOT/adw" "$WALLET_ROOT/ajd"
-        download_wallet "$ADW_WALLET_OBJECT_NAME" "$WALLET_ROOT/adw"
-        download_wallet "$AJD_WALLET_OBJECT_NAME" "$WALLET_ROOT/ajd"
-        chmod -R a+rX "$WALLET_ROOT"
-        chcon -Rt container_file_t "$WALLET_ROOT" 2>/dev/null || true
-      }
-
-      ensure_wallet_mount() {
-        if ! grep -q "^Volume=$WALLET_ROOT:$WALLET_ROOT:" "$API_QUADLET_FILE"; then
-          sed -i "/^EnvironmentFile=/a Volume=$WALLET_ROOT:$WALLET_ROOT:ro,z" "$API_QUADLET_FILE"
-        fi
-      }
-
       reload_runtime() {
         systemctl daemon-reload
         systemctl enable --now podman.socket
@@ -119,8 +69,6 @@ write_files:
 
       refresh_env_from_vault
       login_ocir
-      prepare_wallets
-      ensure_wallet_mount
       reload_runtime
   - path: /usr/local/sbin/my-hub-api-bootstrap
     owner: root:root
@@ -128,8 +76,6 @@ write_files:
     content: |
       #!/usr/bin/env bash
       set -euo pipefail
-
-      WALLET_ROOT="/opt/my-hub/wallets"
 
       install_packages() {
         dnf install -y podman unzip python36-oci-cli || \
@@ -140,12 +86,7 @@ write_files:
       start_api() {
         systemctl daemon-reload
         systemctl enable --now my-hub-api-prepare.service
-        if [[ -f "$WALLET_ROOT/adw/cwallet.sso" && -f "$WALLET_ROOT/ajd/cwallet.sso" ]]; then
-          systemctl enable --now my-hub-api.service
-        else
-          echo "Wallet files are missing; enabling service but not starting it yet."
-          systemctl enable my-hub-api.service
-        fi
+        systemctl enable --now my-hub-api.service
       }
 
       install_packages
@@ -175,7 +116,6 @@ write_files:
       Image=${my_hub_api_image_url}
       ContainerName=my-hub-api
       EnvironmentFile=/etc/my-hub-api.env
-      Volume=/opt/my-hub/wallets:/opt/my-hub/wallets:ro,z
       PublishPort=${my_hub_api_port}:${my_hub_api_port}
 
       [Service]
@@ -213,9 +153,7 @@ write_files:
 
       New instances run /usr/local/sbin/my-hub-api-bootstrap through cloud-init.
       The bootstrap reads OCI_ENV_SECRET from Vault, logs in to OCIR when
-      OCIR_USERNAME and OCIR_AUTH_TOKEN are present, downloads ADW/AJD wallets
-      from Object Storage, applies permissions and SELinux labels, and starts
-      my-hub-api.service.
+      OCIR_USERNAME and OCIR_AUTH_TOKEN are present, and starts my-hub-api.service.
 
       Start or restart the API:
 

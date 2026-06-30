@@ -131,18 +131,6 @@ variable "my_hub_api_environment_secret_name" {
   default     = "my-hub-api-env"
 }
 
-variable "my_hub_api_adw_wallet_object_name" {
-  type        = string
-  description = "Object Storage object name for the ADW wallet zip used by my-hub API bootstrap."
-  default     = "wallets/Wallet_MYHUBADW.zip"
-}
-
-variable "my_hub_api_ajd_wallet_object_name" {
-  type        = string
-  description = "Object Storage object name for the AJD wallet zip used by my-hub API bootstrap."
-  default     = "wallets/Wallet_MYHUBJSON.zip"
-}
-
 variable "my_hub_api_lb_min_bandwidth_mbps" {
   type        = number
   description = "Minimum bandwidth for the flexible public load balancer."
