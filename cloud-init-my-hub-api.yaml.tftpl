@@ -12,16 +12,19 @@ write_files:
       OCIR_ENDPOINT="${ocir_endpoint}"
       API_ENV_FILE="/etc/my-hub-api.env"
 
-      load_bootstrap_env() {
-        set -a
-        # shellcheck disable=SC1090
-        . "$API_ENV_FILE"
-        set +a
+      env_value() {
+        local key="$1"
+        awk -F= -v key="$key" '$1 == key { sub(/^[^=]*=/, ""); print; exit }' "$API_ENV_FILE" 2>/dev/null || true
       }
 
       refresh_env_from_vault() {
-        load_bootstrap_env
-        if [[ -z "$${OCI_ENV_SECRET:-}" || -z "$${OCI_VAULT_ID:-}" ]]; then
+        local oci_env_secret
+        local oci_vault_id
+
+        oci_env_secret="$(env_value OCI_ENV_SECRET)"
+        oci_vault_id="$(env_value OCI_VAULT_ID)"
+
+        if [[ -z "$oci_env_secret" || -z "$oci_vault_id" ]]; then
           echo "OCI_ENV_SECRET or OCI_VAULT_ID is missing; keeping metadata env file."
           return
         fi
@@ -34,8 +37,8 @@ write_files:
         for attempt in $(seq 1 30); do
           if oci secrets secret-bundle get-secret-bundle-by-name \
             --auth instance_principal \
-            --vault-id "$${OCI_VAULT_ID}" \
-            --secret-name "$${OCI_ENV_SECRET}" \
+            --vault-id "$oci_vault_id" \
+            --secret-name "$oci_env_secret" \
             --query 'data."secret-bundle-content".content' \
             --raw-output | base64 --decode >/run/my-hub-api.env; then
             install -m 0600 -o root -g root /run/my-hub-api.env "$API_ENV_FILE"
@@ -51,14 +54,19 @@ write_files:
       }
 
       login_ocir() {
-        load_bootstrap_env
-        if [[ -z "$${OCIR_USERNAME:-}" || -z "$${OCIR_AUTH_TOKEN:-}" ]]; then
+        local ocir_username
+        local ocir_auth_token
+
+        ocir_username="$(env_value OCIR_USERNAME)"
+        ocir_auth_token="$(env_value OCIR_AUTH_TOKEN)"
+
+        if [[ -z "$ocir_username" || -z "$ocir_auth_token" ]]; then
           echo "OCIR_USERNAME or OCIR_AUTH_TOKEN is missing; skipping OCIR login."
           return
         fi
 
-        printf '%s' "$${OCIR_AUTH_TOKEN}" | podman login "$OCIR_ENDPOINT" \
-          --username "$${OCIR_USERNAME}" \
+        printf '%s' "$ocir_auth_token" | podman login "$OCIR_ENDPOINT" \
+          --username "$ocir_username" \
           --password-stdin
       }
 

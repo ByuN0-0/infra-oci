@@ -34,7 +34,10 @@ ensure_ssh_key() {
 }
 
 create_bastion_session() {
-  [[ -z "${BASTION_SESSION_ID}" ]] || return
+  if [[ -n "${BASTION_SESSION_ID}" ]]; then
+    printf 'Using existing OCI Bastion managed SSH session\n' >&2
+    return 0
+  fi
 
   printf 'Creating OCI Bastion managed SSH session\n' >&2
   BASTION_SESSION_ID="$(
@@ -66,7 +69,8 @@ connect_vm() {
     -o "UserKnownHostsFile=${KNOWN_HOSTS_FILE}" \
     -o "ProxyCommand=${proxy_command}" \
     -p 22 \
-    "${VM_USER}@${VM_PRIVATE_IP}"
+    "${VM_USER}@${VM_PRIVATE_IP}" \
+    "$@"
 }
 
 main() {
@@ -75,7 +79,7 @@ main() {
   require_command ssh-keygen
   ensure_ssh_key
   create_bastion_session
-  connect_vm
+  connect_vm "$@"
 }
 
 main "$@"

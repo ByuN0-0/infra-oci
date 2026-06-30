@@ -18,6 +18,18 @@ The script installs Podman, writes `/etc/my-hub-api.env`, writes the Quadlet
 unit at `/etc/containers/systemd/my-hub-api.container`, and enables the
 generated `my-hub-api.service`.
 
+If the VM should refresh its runtime environment from OCI Vault during setup,
+pass the Vault ID and secret name. The script uses instance principal auth and
+logs in to private OCIR when the refreshed env contains `OCIR_USERNAME` and
+`OCIR_AUTH_TOKEN`:
+
+```bash
+sudo IMAGE_URL='ap-chuncheon-1.ocir.io/<namespace>/my-hub-api:latest' \
+  OCI_VAULT_ID='<vault-ocid>' \
+  OCI_ENV_SECRET='my-hub-api-env' \
+  ./setup-my-hub-api-runtime.sh
+```
+
 Because OCIR is private, login once before starting the service:
 
 ```bash

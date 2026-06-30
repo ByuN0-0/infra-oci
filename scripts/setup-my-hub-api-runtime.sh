@@ -9,6 +9,8 @@ fi
 IMAGE_URL="${IMAGE_URL:-}"
 PORT="${PORT:-8080}"
 START_SERVICE="${START_SERVICE:-0}"
+OCI_ENV_SECRET="${OCI_ENV_SECRET:-}"
+OCI_VAULT_ID="${OCI_VAULT_ID:-}"
 
 if [[ -z "${IMAGE_URL}" ]]; then
   echo "IMAGE_URL is required, for example:" >&2
@@ -33,7 +35,59 @@ install_podman() {
   fi
 }
 
+install_oci_cli() {
+  if [[ -z "${OCI_ENV_SECRET}" || -z "${OCI_VAULT_ID}" ]] || command -v oci >/dev/null 2>&1; then
+    return
+  fi
+
+  if command -v dnf >/dev/null 2>&1; then
+    dnf install -y python36-oci-cli || dnf install -y python3-oci-cli
+  elif command -v microdnf >/dev/null 2>&1; then
+    microdnf install -y python3-oci-cli
+  else
+    echo "Could not find dnf or microdnf to install OCI CLI." >&2
+    exit 1
+  fi
+}
+
+env_value() {
+  local key="$1"
+  awk -F= -v key="$key" '$1 == key { sub(/^[^=]*=/, ""); print; exit }' /etc/my-hub-api.env 2>/dev/null || true
+}
+
+refresh_env_from_vault() {
+  if [[ -z "${OCI_ENV_SECRET}" || -z "${OCI_VAULT_ID}" ]]; then
+    return
+  fi
+
+  oci secrets secret-bundle get-secret-bundle-by-name \
+    --auth instance_principal \
+    --vault-id "${OCI_VAULT_ID}" \
+    --secret-name "${OCI_ENV_SECRET}" \
+    --query 'data."secret-bundle-content".content' \
+    --raw-output | base64 --decode >/run/my-hub-api.env
+  install -m 0600 -o root -g root /run/my-hub-api.env /etc/my-hub-api.env
+  rm -f /run/my-hub-api.env
+}
+
+login_ocir() {
+  local ocir_username
+  local ocir_auth_token
+
+  ocir_username="$(env_value OCIR_USERNAME)"
+  ocir_auth_token="$(env_value OCIR_AUTH_TOKEN)"
+
+  if [[ -z "${ocir_username}" || -z "${ocir_auth_token}" ]]; then
+    return
+  fi
+
+  printf '%s' "${ocir_auth_token}" | podman login "${OCIR_ENDPOINT}" \
+    --username "${ocir_username}" \
+    --password-stdin
+}
+
 install_podman
+install_oci_cli
 
 mkdir -p /etc/containers/systemd /opt/my-hub/apps /opt/my-hub/examples
 
@@ -48,6 +102,9 @@ else
     printf '\nPORT=%s\n' "${PORT}" >>/etc/my-hub-api.env
   fi
 fi
+
+refresh_env_from_vault
+login_ocir
 
 cat >/etc/my-hub-api-image <<EOF
 ${IMAGE_URL}
