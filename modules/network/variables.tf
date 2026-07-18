@@ -28,6 +28,11 @@ variable "my_hub_api_port" {
   description = "Port exposed by the my-hub API."
 }
 
+variable "minecraft_port" {
+  type        = number
+  description = "TCP port exposed by the Minecraft Java server."
+}
+
 variable "public_http_ingress_cidrs" {
   type        = set(string)
   description = "CIDR blocks allowed to reach HTTP/HTTPS resources in the public subnet."

@@ -162,6 +162,30 @@ variable "my_hub_api_origin_certificate_ca_certificate" {
   default     = null
 }
 
+variable "minecraft_hostname" {
+  type        = string
+  description = "Public DNS hostname for the Minecraft server."
+  default     = "mc.biyeon.net"
+}
+
+variable "minecraft_port" {
+  type        = number
+  description = "TCP port exposed by the Minecraft Java server."
+  default     = 25565
+}
+
+variable "minecraft_pack_object_name" {
+  type        = string
+  description = "Object Storage object name for the pinned Craft to Exile 2 server pack."
+  default     = "minecraft/cte2/releases/1.1.3/Craft-to-Exile-2-SERVER-1.1.3.zip"
+}
+
+variable "minecraft_backup_retention_days" {
+  type        = number
+  description = "Number of days to retain Minecraft backups in Object Storage."
+  default     = 14
+}
+
 variable "mysql_admin_username" {
   type        = string
   description = "Admin username for MySQL HeatWave."

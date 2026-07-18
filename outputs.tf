@@ -53,6 +53,26 @@ output "my_hub_api_hostname" {
   value       = var.my_hub_api_hostname
 }
 
+output "minecraft_nlb_ip" {
+  description = "Public IP address of the Minecraft network load balancer."
+  value       = oci_network_load_balancer_network_load_balancer.minecraft.ip_addresses[0].ip_address
+}
+
+output "minecraft_private_ip" {
+  description = "Private IP address of the Minecraft compute instance."
+  value       = oci_core_instance.my_hub_api.private_ip
+}
+
+output "minecraft_hostname" {
+  description = "Public DNS hostname for the Minecraft server."
+  value       = var.minecraft_hostname
+}
+
+output "minecraft_pack_object_name" {
+  description = "Object Storage object containing the pinned Minecraft server pack."
+  value       = var.minecraft_pack_object_name
+}
+
 output "bastion_service_id" {
   description = "OCI Bastion Service OCID."
   value       = oci_bastion_bastion.this.id

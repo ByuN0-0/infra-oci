@@ -1,6 +1,6 @@
 locals {
-  ocir_endpoint        = "${var.region}.ocir.io"
-  my_hub_api_image_url = "${local.ocir_endpoint}/${var.namespace}/${var.my_hub_api_repository_name}:${var.my_hub_api_image_tag}"
+  ocir_endpoint             = "${var.region}.ocir.io"
+  my_hub_api_image_url      = "${local.ocir_endpoint}/${var.namespace}/${var.my_hub_api_repository_name}:${var.my_hub_api_image_tag}"
   public_http_ingress_cidrs = local.cloudflare_ipv4_cidrs
 
   cloudflare_ipv4_cidrs = toset([
@@ -173,18 +173,18 @@ resource "oci_core_instance" "my_hub_api" {
   }
 
   create_vnic_details {
-    subnet_id                 = module.network.private_subnet_id
-    display_name              = "my-hub-api-vnic"
-    hostname_label            = "my-hub-api"
-    assign_public_ip          = false
-    nsg_ids                   = [oci_core_network_security_group.my_hub_api_compute.id]
-    skip_source_dest_check    = false
+    subnet_id              = module.network.private_subnet_id
+    display_name           = "my-hub-api-vnic"
+    hostname_label         = "my-hub-api"
+    assign_public_ip       = false
+    nsg_ids                = [oci_core_network_security_group.my_hub_api_compute.id]
+    skip_source_dest_check = false
   }
 
   source_details {
-    source_type              = "image"
-    source_id                = data.oci_core_images.my_hub_api.images[0].id
-    boot_volume_size_in_gbs  = var.my_hub_api_boot_volume_size_gbs
+    source_type             = "image"
+    source_id               = data.oci_core_images.my_hub_api.images[0].id
+    boot_volume_size_in_gbs = var.my_hub_api_boot_volume_size_gbs
   }
 
   metadata = {

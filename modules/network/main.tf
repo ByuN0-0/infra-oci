@@ -93,6 +93,16 @@ resource "oci_core_security_list" "public" {
     }
   }
 
+  ingress_security_rules {
+    protocol    = "6"
+    source      = "0.0.0.0/0"
+    source_type = "CIDR_BLOCK"
+    tcp_options {
+      min = var.minecraft_port
+      max = var.minecraft_port
+    }
+  }
+
   dynamic "ingress_security_rules" {
     for_each = var.public_http_ingress_cidrs
     content {
@@ -130,6 +140,16 @@ resource "oci_core_security_list" "private" {
 
   ingress_security_rules {
     protocol    = "6"
+    source      = "0.0.0.0/0"
+    source_type = "CIDR_BLOCK"
+    tcp_options {
+      min = var.minecraft_port
+      max = var.minecraft_port
+    }
+  }
+
+  ingress_security_rules {
+    protocol    = "6"
     source      = var.private_subnet_cidr
     source_type = "CIDR_BLOCK"
     tcp_options {
@@ -146,23 +166,23 @@ resource "oci_core_security_list" "private" {
 }
 
 resource "oci_core_subnet" "public" {
-  compartment_id      = var.compartment_ocid
-  vcn_id              = oci_core_vcn.this.id
-  cidr_block          = var.public_subnet_cidr
-  display_name        = "${var.vcn_name}-public"
-  dns_label           = "public"
-  route_table_id      = oci_core_route_table.public.id
-  security_list_ids   = [oci_core_security_list.public.id]
+  compartment_id             = var.compartment_ocid
+  vcn_id                     = oci_core_vcn.this.id
+  cidr_block                 = var.public_subnet_cidr
+  display_name               = "${var.vcn_name}-public"
+  dns_label                  = "public"
+  route_table_id             = oci_core_route_table.public.id
+  security_list_ids          = [oci_core_security_list.public.id]
   prohibit_public_ip_on_vnic = false
 }
 
 resource "oci_core_subnet" "private" {
-  compartment_id      = var.compartment_ocid
-  vcn_id              = oci_core_vcn.this.id
-  cidr_block          = var.private_subnet_cidr
-  display_name        = "${var.vcn_name}-private"
-  dns_label           = "private"
-  route_table_id      = oci_core_route_table.private.id
-  security_list_ids   = [oci_core_security_list.private.id]
+  compartment_id             = var.compartment_ocid
+  vcn_id                     = oci_core_vcn.this.id
+  cidr_block                 = var.private_subnet_cidr
+  display_name               = "${var.vcn_name}-private"
+  dns_label                  = "private"
+  route_table_id             = oci_core_route_table.private.id
+  security_list_ids          = [oci_core_security_list.private.id]
   prohibit_public_ip_on_vnic = true
 }

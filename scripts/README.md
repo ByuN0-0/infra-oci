@@ -1,5 +1,38 @@
 # my-hub VM runtime scripts
 
+## Craft to Exile 2 deployment
+
+The current VM is repurposed as a Craft to Exile 2 1.1.3 server. The local
+server-pack ZIP remains untracked under `mode/` and is uploaded to Object
+Storage before the VM downloads it with instance-principal authentication.
+
+```bash
+./scripts/deploy-minecraft.sh
+```
+
+The deployment expands the existing 200 GB boot disk, creates a 140 GB XFS
+logical volume mounted at `/srv/minecraft`, installs the pinned Java 17 Podman
+runtime, and enables `craft-to-exile-2.service`.
+
+Whitelist management:
+
+```bash
+sudo podman exec craft-to-exile-2 rcon-cli whitelist list
+sudo podman exec craft-to-exile-2 rcon-cli whitelist add PlayerName
+sudo podman exec craft-to-exile-2 rcon-cli whitelist remove PlayerName
+```
+
+Useful checks:
+
+```bash
+sudo systemctl status craft-to-exile-2.service
+sudo podman logs -f craft-to-exile-2
+sudo systemctl start minecraft-backup-to-oci.service
+```
+
+The sections below describe the retired my-hub API runtime and are retained
+only as historical migration notes.
+
 These scripts are for an already-running `my-hub-api` VM. New VMs receive the
 same runtime shape through `cloud-init-my-hub-api.yaml.tftpl`.
 
