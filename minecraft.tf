@@ -91,7 +91,7 @@ resource "oci_network_load_balancer_listener" "minecraft" {
   network_load_balancer_id = oci_network_load_balancer_network_load_balancer.minecraft.id
   port                     = var.minecraft_port
   protocol                 = "TCP"
-  tcp_idle_timeout         = 7200
+  tcp_idle_timeout         = 1800
 }
 
 resource "oci_identity_dynamic_group" "minecraft_instance" {
@@ -108,12 +108,15 @@ resource "oci_identity_policy" "minecraft_object_storage" {
   statements = [
     "Allow dynamic-group ${oci_identity_dynamic_group.minecraft_instance.name} to inspect buckets in compartment id ${var.compartment_ocid}",
     "Allow dynamic-group ${oci_identity_dynamic_group.minecraft_instance.name} to manage objects in compartment id ${var.compartment_ocid} where target.bucket.name = '${module.object_storage.bucket_name}'",
+    "Allow service objectstorage-${var.region} to manage object-family in compartment id ${var.compartment_ocid} where target.bucket.name = '${module.object_storage.bucket_name}'",
   ]
 }
 
 resource "oci_objectstorage_object_lifecycle_policy" "minecraft_backups" {
   namespace = var.namespace
   bucket    = module.object_storage.bucket_name
+
+  depends_on = [oci_identity_policy.minecraft_object_storage]
 
   rules {
     action      = "DELETE"
