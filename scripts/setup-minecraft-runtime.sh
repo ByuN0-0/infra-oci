@@ -160,8 +160,9 @@ install_quadlet() {
   install -d -m 0755 /etc/containers/systemd /etc/minecraft
   if [[ ! -s /etc/minecraft/rcon-password ]]; then
     openssl rand -base64 36 >/etc/minecraft/rcon-password
-    chmod 0600 /etc/minecraft/rcon-password
   fi
+  chown "${MINECRAFT_UID}:${MINECRAFT_GID}" /etc/minecraft/rcon-password
+  chmod 0400 /etc/minecraft/rcon-password
 
   podman pull "${MINECRAFT_IMAGE}"
   local pinned_image
@@ -188,8 +189,12 @@ Environment=MAX_MEMORY=20G
 Environment=MAX_PLAYERS=20
 Environment=ONLINE_MODE=TRUE
 Environment=ALLOW_FLIGHT=TRUE
+Environment=ENABLE_COMMAND_BLOCK=TRUE
 Environment=VIEW_DISTANCE=10
 Environment=SIMULATION_DISTANCE=8
+Environment=RESOURCE_PACK=https://objectstorage.ap-chuncheon-1.oraclecloud.com/p/Q_ZpRVn4YDYKPRRwbeuPITg4qMdA69_melqqy-pf4WbSKL7xSkB9fvFVmSYbx2BQ/n/axlyuqadnsst/b/shared-storage/o/minecraft/cte2/resources/1.1.3/cte2-ko-kr-resource-pack.zip
+Environment=RESOURCE_PACK_SHA1=e0b7e7ffb525c6ee9582166edf766e9634b64ba3
+Environment=RESOURCE_PACK_ENFORCE=FALSE
 Environment=WHITELIST=icuL_
 Environment=OPS=icuL_
 Environment=ENFORCE_WHITELIST=TRUE
@@ -220,7 +225,7 @@ enable_runtime() {
   firewall-cmd --reload
   systemctl daemon-reload
   systemctl enable --now podman.socket
-  systemctl enable --now craft-to-exile-2.service
+  systemctl start craft-to-exile-2.service
   systemctl enable --now minecraft-backup-to-oci.timer
 }
 
