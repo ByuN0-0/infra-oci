@@ -152,15 +152,6 @@ resource "oci_core_network_security_group_security_rule" "api_egress_all" {
   destination_type          = "CIDR_BLOCK"
 }
 
-data "oci_core_images" "my_hub_api" {
-  compartment_id           = var.compartment_ocid
-  operating_system         = "Oracle Linux"
-  operating_system_version = "8"
-  shape                    = var.my_hub_api_compute_shape
-  sort_by                  = "TIMECREATED"
-  sort_order               = "DESC"
-}
-
 resource "oci_core_instance" "my_hub_api" {
   availability_domain = local.availability_domain
   compartment_id      = var.compartment_ocid
@@ -183,7 +174,7 @@ resource "oci_core_instance" "my_hub_api" {
 
   source_details {
     source_type             = "image"
-    source_id               = data.oci_core_images.my_hub_api.images[0].id
+    source_id               = var.my_hub_api_image_ocid
     boot_volume_size_in_gbs = var.my_hub_api_boot_volume_size_gbs
   }
 

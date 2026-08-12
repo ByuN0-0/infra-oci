@@ -9,6 +9,12 @@ variable "logen_worker_shape" {
   }
 }
 
+variable "logen_worker_image_ocid" {
+  type        = string
+  description = "Pinned Oracle Linux image OCID for the Logen worker."
+  default     = "ocid1.image.oc1.ap-chuncheon-1.aaaaaaaa6cydynum45yr6y6sawo4djfkfzgwjvia23o44ivzimlgllop6nrq"
+}
+
 variable "logen_worker_boot_volume_size_gbs" {
   type        = number
   description = "Boot volume size in GB for the Logen worker."
@@ -18,15 +24,6 @@ variable "logen_worker_boot_volume_size_gbs" {
     condition     = var.logen_worker_boot_volume_size_gbs >= 47
     error_message = "OCI platform images require a boot volume of at least 47 GB."
   }
-}
-
-data "oci_core_images" "logen_worker" {
-  compartment_id           = var.compartment_ocid
-  operating_system         = "Oracle Linux"
-  operating_system_version = "8"
-  shape                    = var.logen_worker_shape
-  sort_by                  = "TIMECREATED"
-  sort_order               = "DESC"
 }
 
 resource "oci_core_network_security_group" "logen_worker" {
@@ -72,7 +69,7 @@ resource "oci_core_instance" "logen_worker" {
 
   source_details {
     source_type             = "image"
-    source_id               = data.oci_core_images.logen_worker.images[0].id
+    source_id               = var.logen_worker_image_ocid
     boot_volume_size_in_gbs = var.logen_worker_boot_volume_size_gbs
   }
 

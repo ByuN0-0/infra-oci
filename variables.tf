@@ -72,6 +72,12 @@ variable "my_hub_api_compute_shape" {
   default     = "VM.Standard.A1.Flex"
 }
 
+variable "my_hub_api_image_ocid" {
+  type        = string
+  description = "Pinned Oracle Linux image OCID for the my-hub API compute instance."
+  default     = "ocid1.image.oc1.ap-chuncheon-1.aaaaaaaa3io7lyprmudnbhlwzvqbsamrssuyqrm2auv4uwo7flhuyffioiiq"
+}
+
 variable "my_hub_api_ocpus" {
   type        = number
   description = "OCPUs for the my-hub API compute instance."
@@ -246,7 +252,7 @@ variable "enable_autonomous_json_database" {
 variable "enable_autonomous_data_warehouse" {
   type        = bool
   description = "Whether to create the Always Free Autonomous Data Warehouse."
-  default     = true
+  default     = false
 }
 
 variable "namespace" {
