@@ -30,6 +30,45 @@ sudo podman logs -f craft-to-exile-2
 sudo systemctl start minecraft-backup-to-oci.service
 ```
 
+### Korean overrides deployment
+
+The Korean translation is an overrides archive, not a server resource pack.
+Keep the untracked ZIP under `mode/` and deploy it with:
+
+```bash
+./scripts/deploy-minecraft-overrides.sh
+```
+
+The script uploads the archive to Object Storage, creates and verifies a fresh
+Simple Backups archive, gracefully stops Minecraft, overlays the files onto
+`/srv/minecraft/data`, removes the old resource-pack settings, and starts the
+server again. It never overwrites the world, whitelist, OP list, or
+`server.properties` from the ZIP.
+
+## Minecraft admin page
+
+After the `minecraft-admin` Cloudflare Tunnel and Access application exist and
+Terraform has stored its token in OCI Vault, deploy the loopback-only admin
+runtime:
+
+```bash
+./scripts/deploy-minecraft-admin.sh
+```
+
+The deployment creates a Simple Backups archive first, publishes RCON only on
+`127.0.0.1:25575`, builds the ARM64 Go application, and starts the application
+and `cloudflared` as resource-limited Quadlet services. No admin HTTP or RCON
+port is opened in OCI networking or `firewalld`.
+
+Useful checks:
+
+```bash
+sudo systemctl status minecraft-admin.service minecraft-admin-cloudflared.service
+sudo journalctl -u minecraft-admin.service -u minecraft-admin-cloudflared.service -f
+curl http://127.0.0.1:8081/healthz
+sudo tail -f /srv/minecraft-admin/audit/audit.jsonl
+```
+
 The sections below describe the retired my-hub API runtime and are retained
 only as historical migration notes.
 

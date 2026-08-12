@@ -73,6 +73,26 @@ output "minecraft_pack_object_name" {
   value       = var.minecraft_pack_object_name
 }
 
+output "minecraft_admin_hostname" {
+  description = "Cloudflare Access protected Minecraft admin hostname."
+  value       = var.minecraft_admin_hostname
+}
+
+output "minecraft_admin_tunnel_secret_id" {
+  description = "OCI Vault secret OCID containing the Cloudflare Tunnel token."
+  value       = oci_vault_secret.minecraft_admin_cloudflare_tunnel_token.id
+}
+
+output "cloudflare_access_team_domain" {
+  description = "Cloudflare Access team domain used by the Minecraft admin application."
+  value       = var.cloudflare_access_team_domain
+}
+
+output "cloudflare_access_audience" {
+  description = "Cloudflare Access audience tag used by the Minecraft admin application."
+  value       = var.cloudflare_access_audience
+}
+
 output "bastion_service_id" {
   description = "OCI Bastion Service OCID."
   value       = oci_bastion_bastion.this.id

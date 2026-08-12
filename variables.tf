@@ -186,6 +186,38 @@ variable "minecraft_backup_retention_days" {
   default     = 14
 }
 
+variable "minecraft_admin_hostname" {
+  type        = string
+  description = "Cloudflare Access protected hostname for the Minecraft admin application."
+  default     = "mc-admin.biyeon.net"
+}
+
+variable "cloudflare_access_team_domain" {
+  type        = string
+  description = "Cloudflare Access team domain used as the JWT issuer, without a URL path."
+
+  validation {
+    condition     = can(regex("^[A-Za-z0-9.-]+\\.cloudflareaccess\\.com$", trimsuffix(trimprefix(var.cloudflare_access_team_domain, "https://"), "/")))
+    error_message = "cloudflare_access_team_domain must be a <team>.cloudflareaccess.com hostname."
+  }
+}
+
+variable "cloudflare_access_audience" {
+  type        = string
+  description = "Cloudflare Access application audience tag for mc-admin."
+
+  validation {
+    condition     = length(trimspace(var.cloudflare_access_audience)) > 10
+    error_message = "cloudflare_access_audience must contain the Access application audience tag."
+  }
+}
+
+variable "cloudflare_tunnel_token" {
+  type        = string
+  description = "Token for the remotely managed minecraft-admin Cloudflare Tunnel."
+  sensitive   = true
+}
+
 variable "mysql_admin_username" {
   type        = string
   description = "Admin username for MySQL HeatWave."
