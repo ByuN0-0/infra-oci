@@ -18,11 +18,11 @@ variable "logen_worker_image_ocid" {
 variable "logen_worker_boot_volume_size_gbs" {
   type        = number
   description = "Boot volume size in GB for the Logen worker."
-  default     = 47
+  default     = 50
 
   validation {
-    condition     = var.logen_worker_boot_volume_size_gbs >= 47
-    error_message = "OCI platform images require a boot volume of at least 47 GB."
+    condition     = var.logen_worker_boot_volume_size_gbs >= 50 && var.logen_worker_boot_volume_size_gbs <= 32768
+    error_message = "OCI boot volumes must be between 50 GB and 32,768 GB."
   }
 }
 
