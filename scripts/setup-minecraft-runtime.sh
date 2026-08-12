@@ -192,6 +192,9 @@ Environment=ALLOW_FLIGHT=TRUE
 Environment=ENABLE_COMMAND_BLOCK=TRUE
 Environment=VIEW_DISTANCE=10
 Environment=SIMULATION_DISTANCE=8
+Environment=RESOURCE_PACK=https://objectstorage.ap-chuncheon-1.oraclecloud.com/p/Q_ZpRVn4YDYKPRRwbeuPITg4qMdA69_melqqy-pf4WbSKL7xSkB9fvFVmSYbx2BQ/n/axlyuqadnsst/b/shared-storage/o/minecraft/cte2/resources/1.1.3/cte2-ko-kr-resource-pack.zip
+Environment=RESOURCE_PACK_SHA1=e0b7e7ffb525c6ee9582166edf766e9634b64ba3
+Environment=RESOURCE_PACK_ENFORCE=FALSE
 Environment=WHITELIST=icuL_
 Environment=OPS=icuL_
 Environment=ENFORCE_WHITELIST=TRUE
@@ -206,7 +209,6 @@ Environment=GID=${MINECRAFT_GID}
 Volume=${MINECRAFT_DATA}:/data:Z
 Volume=/etc/minecraft/rcon-password:/run/secrets/rcon-password:ro,Z
 PublishPort=${MINECRAFT_PORT}:${MINECRAFT_PORT}/tcp
-PublishPort=127.0.0.1:25575:25575/tcp
 
 [Service]
 Restart=always

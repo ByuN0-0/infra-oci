@@ -33,18 +33,3 @@ resource "oci_identity_policy" "my_hub_api_secret_read" {
     "Allow dynamic-group ${oci_identity_dynamic_group.my_hub_api_secret_readers.name} to inspect vaults in compartment id ${var.compartment_ocid}"
   ]
 }
-
-resource "oci_vault_secret" "minecraft_admin_cloudflare_tunnel_token" {
-  compartment_id = var.compartment_ocid
-  key_id         = oci_kms_key.my_hub_secrets.id
-  secret_name    = "minecraft-admin-cloudflare-tunnel-token"
-  vault_id       = oci_kms_vault.my_hub.id
-  description    = "Remotely managed Cloudflare Tunnel token for the Minecraft admin page."
-
-  secret_content {
-    content_type = "BASE64"
-    content      = base64encode(var.cloudflare_tunnel_token)
-    name         = "current"
-    stage        = "CURRENT"
-  }
-}
