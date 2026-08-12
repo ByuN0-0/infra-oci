@@ -1,0 +1,91 @@
+#cloud-config
+write_files:
+  - path: /usr/local/sbin/logen-worker-bootstrap
+    owner: root:root
+    permissions: "0755"
+    content: |
+      #!/usr/bin/env bash
+      set -euo pipefail
+
+      if ! swapon --show=NAME --noheadings | grep -qx '/swapfile'; then
+        if [[ ! -f /swapfile ]]; then
+          fallocate -l 1G /swapfile || dd if=/dev/zero of=/swapfile bs=1M count=1024
+          chmod 0600 /swapfile
+          mkswap /swapfile
+        fi
+        swapon /swapfile
+      fi
+
+      if ! grep -qE '^/swapfile[[:space:]]' /etc/fstab; then
+        printf '/swapfile none swap sw 0 0\n' >>/etc/fstab
+      fi
+
+      if ! id logen-worker >/dev/null 2>&1; then
+        useradd --system --home-dir /var/lib/logen-worker --create-home --shell /sbin/nologin logen-worker
+      fi
+
+      install -d -m 0755 -o root -g root /opt/logen-worker/bin /etc/logen-worker
+      install -d -m 0750 -o logen-worker -g logen-worker /var/lib/logen-worker
+      touch /etc/logen-worker/logen-worker.env
+      chown root:logen-worker /etc/logen-worker/logen-worker.env
+      chmod 0640 /etc/logen-worker/logen-worker.env
+
+      dnf install -y ca-certificates curl jq
+      systemctl enable --now chronyd
+      systemctl daemon-reload
+
+  - path: /etc/systemd/system/logen-worker.service
+    owner: root:root
+    permissions: "0644"
+    content: |
+      [Unit]
+      Description=Logen Open API integration worker
+      After=network-online.target
+      Wants=network-online.target
+      ConditionPathIsExecutable=/opt/logen-worker/bin/logen-worker
+
+      [Service]
+      Type=simple
+      User=logen-worker
+      Group=logen-worker
+      Environment=GOMAXPROCS=1
+      Environment=GOMEMLIMIT=384MiB
+      EnvironmentFile=-/etc/logen-worker/logen-worker.env
+      ExecStart=/opt/logen-worker/bin/logen-worker
+      Restart=on-failure
+      RestartSec=5s
+      NoNewPrivileges=true
+      PrivateTmp=true
+      ProtectHome=true
+      ProtectSystem=strict
+      ReadWritePaths=/var/lib/logen-worker
+
+      [Install]
+      WantedBy=multi-user.target
+
+  - path: /opt/logen-worker/README.md
+    owner: root:root
+    permissions: "0644"
+    content: |
+      # Logen worker runtime
+
+      This host is an outbound-only worker in the private subnet. It reaches the
+      Logen API and Supabase through the VCN NAT gateway and accepts SSH only
+      through OCI Bastion.
+
+      Install the Linux amd64 worker binary at:
+
+          /opt/logen-worker/bin/logen-worker
+
+      Put runtime configuration in:
+
+          /etc/logen-worker/logen-worker.env
+
+      Then enable the service:
+
+          sudo systemctl enable --now logen-worker.service
+
+      Never place API keys in instance metadata or cloud-init.
+
+runcmd:
+  - /usr/local/sbin/logen-worker-bootstrap
