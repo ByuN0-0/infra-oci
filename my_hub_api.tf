@@ -196,8 +196,7 @@ resource "oci_core_instance" "my_hub_api" {
 
   depends_on = [
     oci_artifacts_container_repository.my_hub_api,
-    oci_identity_policy.my_hub_api_compute_ocir_read,
-    oci_identity_policy.my_hub_api_secret_read
+    oci_identity_policy.my_hub_api_compute_ocir_read
   ]
 }
 
