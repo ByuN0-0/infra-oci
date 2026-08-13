@@ -26,6 +26,12 @@ variable "logen_worker_boot_volume_size_gbs" {
   }
 }
 
+variable "logen_worker_environment_secret_name" {
+  type        = string
+  description = "OCI Vault secret containing the Logen worker dotenv environment."
+  default     = "logen-worker-env"
+}
+
 resource "oci_core_network_security_group" "logen_worker" {
   compartment_id = var.compartment_ocid
   vcn_id         = module.network.vcn_id
@@ -74,7 +80,10 @@ resource "oci_core_instance" "logen_worker" {
   }
 
   metadata = {
-    user_data           = base64encode(file("${path.module}/cloud-init-logen-worker.yaml"))
+    user_data = base64encode(templatefile("${path.module}/cloud-init-logen-worker.yaml.tftpl", {
+      vault_id    = oci_kms_vault.my_hub.id
+      secret_name = var.logen_worker_environment_secret_name
+    }))
     ssh_authorized_keys = var.ssh_authorized_keys
   }
 
@@ -103,4 +112,9 @@ output "logen_worker_private_ip" {
 output "logen_worker_egress_ip" {
   description = "NAT public IP to register in the Logen Open API portal. It remains stable while the NAT gateway exists."
   value       = module.network.nat_gateway_ip
+}
+
+output "logen_worker_environment_secret_name" {
+  description = "OCI Vault secret name read by the Logen worker."
+  value       = var.logen_worker_environment_secret_name
 }

@@ -1,5 +1,48 @@
 # my-hub VM runtime scripts
 
+## Logen queue worker
+
+The Logen worker has no public IP. Supabase Queue jobs are pulled from the
+private VM and Logen sees the NAT egress IP from `logen_worker_egress_ip`.
+
+Create a local dotenv file outside Git with the variables documented in the
+API repository's `docs/logen-open-api.md`, then create the Vault secret:
+
+```bash
+VAULT_ID="$(terraform output -raw logen_worker_vault_id)"
+KEY_ID="$(terraform output -raw my_hub_secrets_key_id)"
+COMPARTMENT_ID="$(terraform output -raw compartment_ocid)"
+
+oci vault secret create-base64 \
+  --compartment-id "${COMPARTMENT_ID}" \
+  --vault-id "${VAULT_ID}" \
+  --key-id "${KEY_ID}" \
+  --secret-name "logen-worker-env" \
+  --secret-content-content "$(base64 < /secure/path/logen-worker.env | tr -d '\n')" \
+  --wait-for-state ACTIVE
+```
+
+After Terraform applies the instance-specific dynamic group and policy, build,
+upload, and start the worker through OCI Bastion. The deployment scripts live
+beside the worker source in the API repository:
+
+```bash
+../ykcorp/api/cmd/logen-worker/deploy.sh
+```
+
+For a binary-only deployment before the Vault secret is ready:
+
+```bash
+START_SERVICE=0 ../ykcorp/api/cmd/logen-worker/deploy.sh
+```
+
+Useful checks:
+
+```bash
+./scripts/ssh-logen-worker.sh 'sudo systemctl status logen-worker.service'
+./scripts/ssh-logen-worker.sh 'sudo journalctl -u logen-worker.service -n 100 --no-pager'
+```
+
 ## Craft to Exile 2 deployment
 
 The current VM is repurposed as a Craft to Exile 2 1.1.3 server. The local

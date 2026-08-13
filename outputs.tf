@@ -118,6 +118,11 @@ output "my_hub_secrets_key_id" {
   value       = oci_kms_key.my_hub_secrets.id
 }
 
+output "logen_worker_vault_id" {
+  description = "OCI Vault OCID used by the Logen worker."
+  value       = oci_kms_vault.my_hub.id
+}
+
 output "namespace" {
   description = "Object Storage namespace."
   value       = var.namespace

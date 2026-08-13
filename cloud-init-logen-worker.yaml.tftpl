@@ -1,5 +1,26 @@
 #cloud-config
 write_files:
+  - path: /usr/local/sbin/logen-worker-refresh-env
+    owner: root:root
+    permissions: "0750"
+    content: |
+      #!/usr/bin/env bash
+      set -euo pipefail
+      umask 077
+
+      oci secrets secret-bundle get-secret-bundle-by-name \
+        --auth instance_principal \
+        --vault-id '${vault_id}' \
+        --secret-name '${secret_name}' \
+        --query 'data."secret-bundle-content".content' \
+        --raw-output | base64 --decode >/run/logen-worker.env
+
+      grep -q '^SUPABASE_URL=' /run/logen-worker.env
+      grep -q '^SUPABASE_SERVICE_ROLE_KEY=' /run/logen-worker.env
+      grep -q '^LOGEN_MODE=' /run/logen-worker.env
+      install -m 0640 -o root -g logen-worker /run/logen-worker.env /etc/logen-worker/logen-worker.env
+      rm -f /run/logen-worker.env
+
   - path: /usr/local/sbin/logen-worker-bootstrap
     owner: root:root
     permissions: "0755"
@@ -31,8 +52,24 @@ write_files:
       chmod 0640 /etc/logen-worker/logen-worker.env
 
       dnf install -y ca-certificates curl jq
+      dnf install -y python39-oci-cli || dnf install -y python3-oci-cli
       systemctl enable --now chronyd
       systemctl daemon-reload
+
+  - path: /usr/local/sbin/logen-worker-run
+    owner: root:root
+    permissions: "0755"
+    content: |
+      #!/usr/bin/env bash
+      set -euo pipefail
+      while IFS= read -r line || [[ -n "$${line}" ]]; do
+        [[ -z "$${line}" || "$${line}" == \#* ]] && continue
+        key="$${line%%=*}"
+        value="$${line#*=}"
+        [[ "$${key}" =~ ^[A-Z][A-Z0-9_]*$ ]] || { printf 'Invalid environment key.\n' >&2; exit 1; }
+        export "$${key}=$${value}"
+      done </etc/logen-worker/logen-worker.env
+      exec /opt/logen-worker/bin/logen-worker
 
   - path: /etc/systemd/system/logen-worker.service
     owner: root:root
@@ -50,15 +87,15 @@ write_files:
       Group=logen-worker
       Environment=GOMAXPROCS=1
       Environment=GOMEMLIMIT=384MiB
-      EnvironmentFile=-/etc/logen-worker/logen-worker.env
-      ExecStart=/opt/logen-worker/bin/logen-worker
+      ExecStartPre=+/usr/local/sbin/logen-worker-refresh-env
+      ExecStart=/usr/local/sbin/logen-worker-run
       Restart=on-failure
       RestartSec=5s
       NoNewPrivileges=true
       PrivateTmp=true
       ProtectHome=true
       ProtectSystem=strict
-      ReadWritePaths=/var/lib/logen-worker
+      ReadWritePaths=/etc/logen-worker /var/lib/logen-worker
 
       [Install]
       WantedBy=multi-user.target
@@ -69,23 +106,12 @@ write_files:
     content: |
       # Logen worker runtime
 
-      This host is an outbound-only worker in the private subnet. It reaches the
-      Logen API and Supabase through the VCN NAT gateway and accepts SSH only
-      through OCI Bastion.
+      The worker has no public IP. It pulls jobs from Supabase and calls Logen
+      through the VCN NAT gateway. Runtime secrets are refreshed from the OCI
+      Vault secret `${secret_name}` before every service start.
 
-      Install the Linux amd64 worker binary at:
-
-          /opt/logen-worker/bin/logen-worker
-
-      Put runtime configuration in:
-
-          /etc/logen-worker/logen-worker.env
-
-      Then enable the service:
-
-          sudo systemctl enable --now logen-worker.service
-
-      Never place API keys in instance metadata or cloud-init.
+      Install the Linux amd64 binary at `/opt/logen-worker/bin/logen-worker`,
+      then enable `logen-worker.service`.
 
 runcmd:
   - /usr/local/sbin/logen-worker-bootstrap

@@ -20,7 +20,25 @@ resource "oci_identity_dynamic_group" "my_hub_api_secret_readers" {
   compartment_id = var.tenancy_ocid
   name           = "my-hub-api-secret-readers"
   description    = "my-hub API compute instances allowed to read bootstrap secrets."
-  matching_rule  = "ALL {instance.compartment.id = '${var.compartment_ocid}'}"
+  matching_rule  = "ALL {instance.id = '${oci_core_instance.my_hub_api.id}'}"
+}
+
+resource "oci_identity_dynamic_group" "logen_worker_secret_readers" {
+  compartment_id = var.tenancy_ocid
+  name           = "logen-worker-secret-readers"
+  description    = "Logen worker compute instance allowed to read its runtime environment secret."
+  matching_rule  = "ALL {instance.id = '${oci_core_instance.logen_worker.id}'}"
+}
+
+resource "oci_identity_policy" "logen_worker_secret_read" {
+  compartment_id = var.tenancy_ocid
+  name           = "logen-worker-secret-read"
+  description    = "Allow the Logen worker to read OCI Vault secret bundles."
+
+  statements = [
+    "Allow dynamic-group ${oci_identity_dynamic_group.logen_worker_secret_readers.name} to read secret-bundles in compartment id ${var.compartment_ocid}",
+    "Allow dynamic-group ${oci_identity_dynamic_group.logen_worker_secret_readers.name} to inspect vaults in compartment id ${var.compartment_ocid}"
+  ]
 }
 
 resource "oci_identity_policy" "my_hub_api_secret_read" {
