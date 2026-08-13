@@ -64,6 +64,17 @@ resource "oci_core_instance" "logen_worker" {
     recovery_action = "RESTORE_INSTANCE"
   }
 
+  agent_config {
+    are_all_plugins_disabled = false
+    is_management_disabled   = false
+    is_monitoring_disabled   = false
+
+    plugins_config {
+      name          = "Bastion"
+      desired_state = "ENABLED"
+    }
+  }
+
   create_vnic_details {
     subnet_id              = module.network.private_subnet_id
     display_name           = "logen-worker-vnic"
